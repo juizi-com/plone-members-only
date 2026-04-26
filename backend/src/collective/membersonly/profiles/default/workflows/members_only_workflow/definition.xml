@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dc-workflow description="A workflow with private, review, members-only, and published states."
+             initial_state="private"
+             manager_bypass="False"
+             state_variable="review_state"
+             title="Members Only Workflow"
+             workflow_id="members_only_workflow"
+>
+  <permission>Access contents information</permission>
+  <permission>View</permission>
+  <permission>Collective Members Only: View Teaser</permission>
+
+  <state state_id="private" title="Private">
+    <description>Only visible to editors.</description>
+    <exit-transition transition_id="submit"/>
+    <exit-transition transition_id="restrict_to_members"/>
+    <exit-transition transition_id="publish"/>
+    <permission-map name="Access contents information" acquired="False">
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Contributor</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+    <permission-map name="View" acquired="False">
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Contributor</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+    <permission-map name="Collective Members Only: View Teaser" acquired="False">
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+  </state>
+
+  <state state_id="pending" title="Pending review">
+    <description>Awaiting review before publication.</description>
+    <exit-transition transition_id="restrict_to_members"/>
+    <exit-transition transition_id="publish"/>
+    <exit-transition transition_id="retract"/>
+    <permission-map name="Access contents information" acquired="False">
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Reviewer</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+    <permission-map name="View" acquired="False">
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Reviewer</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+    <permission-map name="Collective Members Only: View Teaser" acquired="False">
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Reviewer</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+  </state>
+
+  <state state_id="members_only" title="Members only">
+    <description>Teaser visible publicly, full content for authenticated users only.</description>
+    <exit-transition transition_id="publish"/>
+    <exit-transition transition_id="retract"/>
+    <permission-map name="Access contents information" acquired="False">
+      <permission-role>Anonymous</permission-role>
+      <permission-role>Authenticated</permission-role>
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Reviewer</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+    <permission-map name="View" acquired="False">
+      <permission-role>Authenticated</permission-role>
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Reviewer</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+    <permission-map name="Collective Members Only: View Teaser" acquired="False">
+      <permission-role>Anonymous</permission-role>
+      <permission-role>Authenticated</permission-role>
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Reviewer</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+  </state>
+
+  <state state_id="published" title="Published">
+    <description>Fully public.</description>
+    <exit-transition transition_id="retract"/>
+    <exit-transition transition_id="retract_to_members"/>
+    <permission-map name="Access contents information" acquired="False">
+      <permission-role>Anonymous</permission-role>
+      <permission-role>Authenticated</permission-role>
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Reviewer</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+    <permission-map name="View" acquired="False">
+      <permission-role>Anonymous</permission-role>
+      <permission-role>Authenticated</permission-role>
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Reviewer</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+    <permission-map name="Collective Members Only: View Teaser" acquired="False">
+      <permission-role>Anonymous</permission-role>
+      <permission-role>Authenticated</permission-role>
+      <permission-role>Manager</permission-role>
+      <permission-role>Owner</permission-role>
+      <permission-role>Editor</permission-role>
+      <permission-role>Reviewer</permission-role>
+      <permission-role>Site Administrator</permission-role>
+    </permission-map>
+  </state>
+
+  <transition after_script=""
+              before_script=""
+              new_state="pending"
+              title="Submit for review"
+              transition_id="submit"
+              trigger="USER"
+  >
+    <action category="workflow"
+            icon=""
+            url="%(content_url)s/content_status_modify?workflow_action=submit"
+    >Submit for review</action>
+    <guard>
+      <guard-permission>Request review</guard-permission>
+    </guard>
+  </transition>
+
+  <transition after_script=""
+              before_script=""
+              new_state="members_only"
+              title="Restrict to members"
+              transition_id="restrict_to_members"
+              trigger="USER"
+  >
+    <action category="workflow"
+            icon=""
+            url="%(content_url)s/content_status_modify?workflow_action=restrict_to_members"
+    >Restrict to members</action>
+    <guard>
+      <guard-permission>Review portal content</guard-permission>
+    </guard>
+  </transition>
+
+  <transition after_script=""
+              before_script=""
+              new_state="published"
+              title="Publish"
+              transition_id="publish"
+              trigger="USER"
+  >
+    <action category="workflow"
+            icon=""
+            url="%(content_url)s/content_status_modify?workflow_action=publish"
+    >Publish</action>
+    <guard>
+      <guard-permission>Review portal content</guard-permission>
+    </guard>
+  </transition>
+
+  <transition after_script=""
+              before_script=""
+              new_state="private"
+              title="Retract"
+              transition_id="retract"
+              trigger="USER"
+  >
+    <action category="workflow"
+            icon=""
+            url="%(content_url)s/content_status_modify?workflow_action=retract"
+    >Retract</action>
+    <guard>
+      <guard-permission>Request review</guard-permission>
+    </guard>
+  </transition>
+
+  <transition after_script=""
+              before_script=""
+              new_state="members_only"
+              title="Retract to members only"
+              transition_id="retract_to_members"
+              trigger="USER"
+  >
+    <action category="workflow"
+            icon=""
+            url="%(content_url)s/content_status_modify?workflow_action=retract_to_members"
+    >Retract to members only</action>
+    <guard>
+      <guard-permission>Review portal content</guard-permission>
+    </guard>
+  </transition>
+
+  <worklist worklist_id="reviewer_queue" title="Reviewer tasks">
+    <guard>
+      <guard-permission>Review portal content</guard-permission>
+    </guard>
+    <match name="review_state" values="pending"/>
+  </worklist>
+
+  <variable for_catalog="False"
+            for_status="True"
+            update_always="True"
+            variable_id="action"
+  >
+    <description>Previous transition</description>
+    <default>
+      <expression>transition/getId|nothing</expression>
+    </default>
+    <guard></guard>
+  </variable>
+
+  <variable for_catalog="False"
+            for_status="True"
+            update_always="True"
+            variable_id="actor"
+  >
+    <description>The ID of the user who performed the last transition</description>
+    <default>
+      <expression>user/getId</expression>
+    </default>
+    <guard></guard>
+  </variable>
+
+  <variable for_catalog="False"
+            for_status="True"
+            update_always="True"
+            variable_id="comments"
+  >
+    <description>Comment about the last transition</description>
+    <default>
+      <expression>python:state_change.kwargs.get('comment', '')</expression>
+    </default>
+    <guard></guard>
+  </variable>
+
+  <variable for_catalog="False"
+            for_status="False"
+            update_always="False"
+            variable_id="review_history"
+  >
+    <description>Provides access to workflow history</description>
+    <default>
+      <expression>state_change/getHistory</expression>
+    </default>
+    <guard>
+      <guard-permission>View</guard-permission>
+    </guard>
+  </variable>
+
+  <variable for_catalog="False"
+            for_status="True"
+            update_always="True"
+            variable_id="time"
+  >
+    <description>When the previous transition was performed</description>
+    <default>
+      <expression>state_change/getDateTime</expression>
+    </default>
+    <guard></guard>
+  </variable>
+
+</dc-workflow>

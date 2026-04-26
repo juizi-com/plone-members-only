@@ -1,0 +1,32 @@
+[repository]
+name = "plone-members-only"
+changelog = "CHANGELOG.md"
+version = "version.txt"
+version_format = "semver"
+container_images_prefix = "ghcr.io/collective/plone-members-only"
+compose = ["docker-compose.yml"]
+
+[repository.towncrier]
+section = "Project"
+settings = "towncrier.toml"
+
+[backend.package]
+name = "collective.membersonly"
+path = "backend"
+changelog = "backend/CHANGELOG.md"
+towncrier_settings = "backend/pyproject.toml"
+base_package = "Products.CMFPlone"
+publish = true
+
+[frontend.package]
+name = "volto-members-only"
+path = "frontend/packages/volto-members-only"
+changelog = "frontend/packages/volto-members-only/CHANGELOG.md"
+towncrier_settings = "frontend/packages/volto-members-only/towncrier.toml"
+base_package = "@plone/volto"
+publish = true
+
+[cookieplone]
+template = "monorepo_addon"
+template_version = "f43600068a2ed0e833072cdc4963358a238a430a"
+generated_date = "2026-04-26 18:00:46"

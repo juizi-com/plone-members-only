@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rolemap>
+  <permissions>
+    <permission name="Collective Members Only: View Teaser" acquire="False">
+      <role name="Anonymous"/>
+      <role name="Authenticated"/>
+      <role name="Contributor"/>
+      <role name="Editor"/>
+      <role name="Manager"/>
+      <role name="Member"/>
+      <role name="Owner"/>
+      <role name="Reader"/>
+      <role name="Reviewer"/>
+      <role name="Site Administrator"/>
+    </permission>
+  </permissions>
+</rolemap>

@@ -1,0 +1,42 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="collective.membersonly"
+    >
+
+  <genericsetup:registerProfile
+      name="default"
+      title="Plone Members Only: Install"
+      description="Gated content with public metadata teaser for Plone 6 / Volto sites"
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      directory="profiles/default"
+      post_handler=".setuphandlers.post_install"
+      />
+
+  <genericsetup:registerProfile
+      name="initial"
+      title="Plone Members Only: Example content"
+      description="Create example content to showcase this addon."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      directory="profiles/initial"
+      pre_handler=".setuphandlers.initial.create_example_content"
+      />
+
+  <genericsetup:registerProfile
+      name="uninstall"
+      title="Plone Members Only: Uninstall"
+      description="Uninstall Plone Members Only setup."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      directory="profiles/uninstall"
+      />
+
+  <!-- Hide Uninstall Profile-->
+  <utility
+      factory=".setuphandlers.HiddenProfiles"
+      name="collective.membersonly"
+      />
+
+
+  <include package=".upgrades" />
+
+</configure>

@@ -1,0 +1,8 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <permission
+    id="collective.membersonly.ViewTeaser"
+    title="Collective Members Only: View Teaser"
+  />
+
+</configure>
