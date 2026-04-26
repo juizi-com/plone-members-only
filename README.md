@@ -1,148 +1,51 @@
-# Plone Members Only 🚀
+# collective.membersonly / volto-members-only
 
-[![Built with Cookieplone](https://img.shields.io/badge/built%20with-Cookieplone-0083be.svg?logo=cookiecutter)](https://github.com/plone/cookieplone-templates/)
-[![Black code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![CI](https://github.com/collective/plone-members-only/actions/workflows/main.yml/badge.svg)](https://github.com/collective/plone-members-only/actions/workflows/main.yml)
+A Plone 6 / Volto addon that enables gated content with a public metadata teaser.
 
-Gated content with public metadata teaser for Plone 6 / Volto sites
+## The problem
 
-## Quick Start 🏁
+Plone's default workflow offers two states for content visibility: private (invisible to anonymous users and search engines) and published (fully public). There is no middle ground for content that should be discoverable but restricted — where Google and logged-out visitors can see a teaser, but the full content requires authentication.
 
-### Prerequisites ✅
+This is a common need for nonprofits and educational institutions that want to surface member resources in search results while keeping the content itself gated.
 
--   An [operating system](https://6.docs.plone.org/install/create-project-cookieplone.html#prerequisites-for-installation) that runs all the requirements mentioned.
--   [uv](https://6.docs.plone.org/install/create-project-cookieplone.html#uv)
--   [nvm](https://6.docs.plone.org/install/create-project-cookieplone.html#nvm)
--   [Node.js and pnpm](https://6.docs.plone.org/install/create-project.html#node-js) 22
--   [Make](https://6.docs.plone.org/install/create-project-cookieplone.html#make)
--   [Git](https://6.docs.plone.org/install/create-project-cookieplone.html#git)
--   [Docker](https://docs.docker.com/get-started/get-docker/) (optional)
+## The solution
 
+This addon introduces a members_only workflow state that sits between private and published. Content in this state returns a 200 OK to anonymous users, serves only safe metadata fields via a dedicated teaser endpoint, serves full content to authenticated users, displays a teaser view in Volto with a login prompt, and appears in site search and listing results with meaningful titles and descriptions.
 
-### Installation 🔧
+## Architecture
 
-1.  Clone this repository, then change your working directory.
+### Security model
 
-    ```shell
-    git clone git@github.com:collective/plone-members-only.git
-    cd plone-members-only
-    ```
+The addon introduces a custom permission — Collective Members Only: View Teaser — granted to Anonymous in the members_only workflow state. The standard View permission remains restricted to authenticated users. Classic UI access by anonymous users is blocked at the Zope security layer without requiring any proxy configuration.
 
-2.  Install this code base.
+### Workflow states
 
-    ```shell
-    make install
-    ```
+- Private: working draft, visible to editors only. Direct transitions to members only or published available.
+- Pending review: submitted for approval. Reviewer can restrict to members or publish.
+- Members only: teaser public, full content for authenticated users only.
+- Published: fully public, no restrictions.
 
+### Backend
 
-### Fire Up the Servers 🔥
+- Custom members_only_workflow with four states and five transitions
+- A teaser browser view returning only safe fields for anonymous requests
+- Custom View Teaser permission granted to Anonymous in the members_only state
+- post_install handler creates the workflow programmatically on install
 
-1.  Create a new Plone site on your first run.
+### Frontend
 
-    ```shell
-    make backend-create-site
-    ```
+- Custom 401 error view that detects members-only content and fetches the teaser
+- MembersOnlyTeaser component rendering title, description, preview image, and login CTA
+- Registered automatically via volto.config.js
 
-2.  Start the backend at http://localhost:8080/.
+## Current status
 
-    ```shell
-    make backend-start
-    ```
+Complete: workflow definition, permission model, teaser backend endpoint, Volto teaser view component, automatic install handler, private GitHub repository.
 
-3.  In a new shell session, start the frontend at http://localhost:3000/.
+In progress: configurable field list via control panel, schema.org and Open Graph head markup, members only badge in listing and search results, uninstall profile cleanup.
 
-    ```shell
-    make frontend-start
-    ```
+## Development setup
 
-Voila! Your Plone site should be live and kicking! 🎉
+Requires Plone 6.1.4+, Volto 18+, Python 3.11+, Node 22+ via nvm, and pnpm.
 
-### Local Stack Deployment 📦
-
-Deploy a local Docker Compose environment that includes the following.
-
-- Docker images for Backend and Frontend 🖼️
-- A stack with a Traefik router and a PostgreSQL database 🗃️
-- Accessible at [http://plone-members-only.localhost](http://plone-members-only.localhost) 🌐
-
-Run the following commands in a shell session.
-
-```shell
-make stack-create-site
-make stack-start
-```
-
-And... you're all set! Your Plone site is up and running locally! 🚀
-
-## Project structure 🏗️
-
-This monorepo consists of the following distinct sections:
-
-- **backend**: Houses the API and Plone installation, utilizing pip instead of buildout, and includes a policy package named collective.membersonly.
-- **frontend**: Contains the React (Volto) package.
-- **devops**: Encompasses Docker stack, Ansible playbooks, and cache settings.
-- **docs**: Scaffold for writing documentation for your project.
-
-### Why this structure? 🤔
-
-- All necessary codebases to run the site are contained within the repository (excluding existing add-ons for Plone and React).
-- Specific GitHub Workflows are triggered based on changes in each codebase (refer to .github/workflows).
-- Simplifies the creation of Docker images for each codebase.
-- Demonstrates Plone installation/setup without buildout.
-
-## Code quality assurance 🧐
-
-To check your code against quality standards, run the following shell command.
-
-```shell
-make check
-```
-
-### Format the codebase
-
-To format and rewrite the code base, ensuring it adheres to quality standards, run the following shell command.
-
-```shell
-make format
-```
-
-| Section | Tool | Description | Configuration |
-| --- | --- | --- | --- |
-| backend | Ruff | Python code formatting, imports sorting  | [`backend/pyproject.toml`](./backend/pyproject.toml) |
-| backend | `zpretty` | XML and ZCML formatting  | -- |
-| frontend | ESLint | Fixes most common frontend issues | [`frontend/.eslintrc.js`](.frontend/.eslintrc.js) |
-| frontend | prettier | Format JS and Typescript code  | [`frontend/.prettierrc`](.frontend/.prettierrc) |
-| frontend | Stylelint | Format Styles (css, less, sass)  | [`frontend/.stylelintrc`](.frontend/.stylelintrc) |
-
-Formatters can also be run within the `backend` or `frontend` folders.
-
-### Linting the codebase
-or `lint`:
-
- ```shell
-make lint
-```
-
-| Section | Tool | Description | Configuration |
-| --- | --- | --- | --- |
-| backend | Ruff | Checks code formatting, imports sorting  | [`backend/pyproject.toml`](./backend/pyproject.toml) |
-| backend | Pyroma | Checks Python package metadata  | -- |
-| backend | check-python-versions | Checks Python version information  | -- |
-| backend | `zpretty` | Checks XML and ZCML formatting  | -- |
-| frontend | ESLint | Checks JS / Typescript lint | [`frontend/.eslintrc.js`](.frontend/.eslintrc.js) |
-| frontend | prettier | Check JS / Typescript formatting  | [`frontend/.prettierrc`](.frontend/.prettierrc) |
-| frontend | Stylelint | Check Styles (css, less, sass) formatting  | [`frontend/.stylelintrc`](.frontend/.stylelintrc) |
-
-Linters can be run individually within the `backend` or `frontend` folders.
-
-## Internationalization 🌐
-
-Generate translation files for Plone and Volto with ease:
-
-```shell
-make i18n
-```
-
-## Credits and acknowledgements 🙏
-
-Generated using [Cookieplone (0.9.10)](https://github.com/plone/cookieplone) and [cookieplone-templates (f436000)](https://github.com/plone/cookieplone-templates/commit/f43600068a2ed0e833072cdc4963358a238a430a) on 2026-04-26 19:59:22.101330. A special thanks to all contributors and supporters!
+Backend runs at http://localhost:8080/Plone and frontend at http://localhost:3000.
