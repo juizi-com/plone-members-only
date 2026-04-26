@@ -1,0 +1,12 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <browser:page
+      name="teaser"
+      for="plone.dexterity.interfaces.IDexterityContent"
+      class=".teaser.TeaserView"
+      permission="collective.membersonly.ViewTeaser"
+      />
+
+</configure>

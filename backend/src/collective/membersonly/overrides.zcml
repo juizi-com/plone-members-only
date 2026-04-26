@@ -1,0 +1,11 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <adapter
+      factory=".serializers.summary.MembersOnlySerializeToJson"
+      provides="plone.restapi.interfaces.ISerializeToJson"
+      for="plone.dexterity.interfaces.IDexterityContent
+           zope.interface.Interface"
+      />
+
+</configure>
