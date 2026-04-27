@@ -12,9 +12,22 @@ const MembersOnlyTeaser = ({ content }) => {
   const siteUrl = config.settings.publicURL || config.settings.apiPath;
   const canonicalUrl = `${siteUrl}${location.pathname}`;
 
-  const ogImage = content.preview_image?.download
-    ? flattenToAppURL(content.preview_image.download)
-    : null;
+  const getImageUrl = (download) => {
+    if (!download) return null;
+    const flat = flattenToAppURL(download);
+    // If it's a teaser-image URL, route through the API proxy
+    if (flat.includes('@@teaser-image')) {
+      return `${config.settings.apiPath}/++api++${flat}`;
+    }
+    // Ensure fully qualified URL for og:image
+    if (flat.startsWith('/')) {
+      const publicURL = config.settings.publicURL || config.settings.apiPath;
+      return `${publicURL}${flat}`;
+    }
+    return flat;
+  };
+
+  const ogImage = getImageUrl(content.preview_image?.download);
 
   return (
     <>

@@ -9,4 +9,19 @@
       permission="collective.membersonly.ViewTeaser"
       />
 
+  <browser:page
+      name="teaser-image"
+      for="plone.dexterity.interfaces.IDexterityContent"
+      class=".teaser.TeaserImageView"
+      permission="collective.membersonly.ViewTeaser"
+      />
+
+  <adapter
+      factory=".teaser.TeaserImageView"
+      for="plone.dexterity.interfaces.IDexterityContent
+           zope.publisher.interfaces.browser.IBrowserRequest"
+      provides="zope.publisher.interfaces.IPublishTraverse"
+      name="teaser-image"
+      />
+
 </configure>
