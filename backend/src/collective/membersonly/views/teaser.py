@@ -26,16 +26,50 @@ class TeaserView(Service):
         if hasattr(obj, 'creators'):
             result['creators'] = obj.creators
 
+        # Preview image (inline)
         if hasattr(obj, 'preview_image') and obj.preview_image:
             scales = obj.restrictedTraverse('@@images')
             try:
-                scale = scales.scale('preview_image', scale='preview')
+                scale = scales.scale('preview_image', scale='large')
                 if scale:
                     result['preview_image'] = {
                         'download': scale.url,
                         'width': scale.width,
                         'height': scale.height,
                     }
+            except Exception:
+                pass
+
+        # Preview image link (relation to separate image object)
+        if not result.get('preview_image'):
+            try:
+                preview_image_link = getattr(obj, 'preview_image_link', None)
+                if preview_image_link:
+                    target = preview_image_link.to_object
+                    if target is not None:
+                        scales = target.restrictedTraverse('@@images')
+                        scale = scales.scale('image', scale='large')
+                        if scale:
+                            result['preview_image'] = {
+                                'download': scale.url,
+                                'width': scale.width,
+                                'height': scale.height,
+                            }
+            except Exception:
+                pass
+
+        # Lead image (News Item)
+        if not result.get('preview_image'):
+            try:
+                if hasattr(obj, 'image') and obj.image:
+                    scales = obj.restrictedTraverse('@@images')
+                    scale = scales.scale('image', scale='large')
+                    if scale:
+                        result['preview_image'] = {
+                            'download': scale.url,
+                            'width': scale.width,
+                            'height': scale.height,
+                        }
             except Exception:
                 pass
 
