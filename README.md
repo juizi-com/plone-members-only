@@ -157,3 +157,28 @@ You can validate the structured data implementation using Google's Rich Results 
 - Google's official documentation: `https://developers.google.com/search/docs/appearance/structured-data/paywalled-content`
 - Google's article structured data guide: `https://developers.google.com/search/docs/appearance/structured-data/article`
 - General structured data guidelines: `https://developers.google.com/search/docs/appearance/structured-data/sd-policies`
+
+## Deployment considerations
+
+### Reverse proxy caching
+
+This addon serves different content to anonymous and authenticated users at the same URLs — anonymous users get the teaser, authenticated users get the full content. If your reverse proxy (Nginx, Varnish, or a CDN) caches responses without accounting for authentication state, a cached teaser could be served to an authenticated user or a cached full-content response could be served to an anonymous user.
+
+To prevent this, ensure your proxy configuration varies its cache on authentication state. In Nginx:
+
+```nginx
+proxy_cache_bypass $cookie_auth_tkt;
+proxy_no_cache $cookie_auth_tkt;
+```
+
+Or more broadly using the Vary header approach — ensure your Plone/Volto deployment sets `Vary: Cookie` on content responses, which instructs any intermediate cache to keep separate entries for requests with and without session cookies.
+
+If you are using a CDN, configure it to pass through or vary on the `Authorization` header and session cookies for all content URLs.
+
+### Image serving
+
+The `@@teaser-image` view reads image data from the ZODB and serves it directly. For high-traffic sites this may put unnecessary load on the application server. Consider serving images from a dedicated media server or CDN, pointing `preview_image_link` at images stored on a separately cached origin rather than inline `preview_image` fields stored directly on content objects.
+
+### Workflow assignment
+
+The addon does not automatically assign `members_only_workflow` to any content types on install — this is a deliberate site-level decision left to the administrator. After installing the addon, go to the Types control panel in Site Setup and assign `members_only_workflow` to the content types you want to use it with, or set it as the site default workflow if appropriate.
