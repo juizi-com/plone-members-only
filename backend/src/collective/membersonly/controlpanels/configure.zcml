@@ -5,6 +5,11 @@
     i18n_domain="collective.membersonly"
     >
 
-  <!-- -*- extra stuff goes here -*- -->
+  <browser:page
+      name="members-only-controlpanel"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      class=".controlpanel.MembersOnlyControlPanelView"
+      permission="cmf.ManagePortal"
+      />
 
 </configure>

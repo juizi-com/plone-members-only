@@ -2,7 +2,17 @@
 <object xmlns:i18n="http://xml.zope.org/namespaces/i18n"
         name="portal_controlpanel"
 >
-
-  <!-- -*- extra stuff goes here -*- -->
-
+  <configlet
+      title="Members Only"
+      action_id="collective.membersonly"
+      appId="collective.membersonly"
+      category="Products"
+      condition_expr=""
+      icon_expr=""
+      url_expr="string:${portal_url}/@@members-only-controlpanel"
+      visible="True"
+      i18n:attributes="title"
+  >
+    <permission>Manage portal</permission>
+  </configlet>
 </object>

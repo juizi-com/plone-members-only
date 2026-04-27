@@ -2,7 +2,13 @@
 <registry xmlns:i18n="http://xml.zope.org/namespaces/i18n"
           i18n:domain="collective.membersonly"
 >
-
-  <!-- -*- extra stuff goes here -*- -->
-
+  <records interface="collective.membersonly.controlpanels.controlpanel.IMembersOnlySettings"
+           prefix="collective.membersonly">
+    <value key="teaser_fields" purge="false">
+      <element>description</element>
+      <element>preview_image</element>
+      <element>effective</element>
+      <element>creators</element>
+    </value>
+  </records>
 </registry>
