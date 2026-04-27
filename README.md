@@ -105,3 +105,40 @@ In production there is only one URL and one login path through Volto, so this di
 Plone's `@@images` view checks the `View` permission on the parent content object. Since anonymous users have `View Teaser` but not `View` on `members_only` content, serving inline images through `@@images` returned a 401.
 
 **Resolution:** A custom `@@teaser-image` view was introduced, protected by `View Teaser` instead of `View`. The `@@teaser` endpoint returns image URLs pointing to `@@teaser-image` rather than `@@images`, so anonymous users can access the image without ever needing `View` on the content object. The frontend constructs fully qualified URLs for `og:image` using `config.settings.publicURL` as the base, ensuring social platforms and Google can resolve the image correctly.
+
+## Google indexing and honest signalling
+
+A core concern with gated content is that showing a teaser to Google while restricting full access to logged-in users could be interpreted as cloaking — serving different content to crawlers than to users, which violates Google's spam policies.
+
+This addon handles this correctly by implementing Google's recommended pattern for paywalled and subscription-gated content using schema.org structured data.
+
+### How it works
+
+The teaser view includes a JSON-LD block in the page `<head>` that explicitly declares the content as gated:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "isAccessibleForFree": false,
+  "hasPart": {
+    "@type": "WebPageElement",
+    "isAccessibleForFree": false,
+    "cssSelector": ".members-only-gate"
+  }
+}
+```
+
+The `isAccessibleForFree: false` property on the `Article` tells Google the content is gated. The `hasPart` property with `cssSelector` points to the specific element on the page that contains the restricted content — in this case the `.members-only-gate` div which wraps the login prompt. This allows Google to differentiate between the publicly visible teaser and the gated portion.
+
+This is the same pattern used by news publishers and academic journals. Google understands it and indexes the teaser without penalising the site for showing different content to crawlers and users.
+
+### Validation
+
+You can validate the structured data implementation using Google's Rich Results Test at `https://search.google.com/test/rich-results`. The tool specifically supports `isAccessibleForFree` and `cssSelector` validation for paywalled content.
+
+### Further reading
+
+- Google's official documentation: `https://developers.google.com/search/docs/appearance/structured-data/paywalled-content`
+- Google's article structured data guide: `https://developers.google.com/search/docs/appearance/structured-data/article`
+- General structured data guidelines: `https://developers.google.com/search/docs/appearance/structured-data/sd-policies`
