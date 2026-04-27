@@ -10,49 +10,97 @@ This is a common need for nonprofits and educational institutions that want to s
 
 ## The solution
 
-This addon introduces a members_only workflow state that sits between private and published. Content in this state returns a 200 OK to anonymous users, serves only safe metadata fields via a dedicated teaser endpoint, serves full content to authenticated users, displays a teaser view in Volto with a login prompt, and appears in site search and listing results with meaningful titles and descriptions.
+This addon introduces a `members_only` workflow state that sits between private and published. Content in this state returns a 200 OK to anonymous users, serves only safe metadata fields via a dedicated teaser endpoint, serves full content to authenticated users, displays a teaser view in Volto with a login prompt, and appears in site search and listing results with meaningful titles and descriptions.
 
 ## Architecture
 
 ### Security model
 
-The addon introduces a custom permission — Collective Members Only: View Teaser — granted to Anonymous in the members_only workflow state. The standard View permission remains restricted to authenticated users. Classic UI access by anonymous users is blocked at the Zope security layer without requiring any proxy configuration.
+The addon introduces a custom permission — `Collective Members Only: View Teaser` — granted to Anonymous in the `members_only` workflow state. The standard `View` permission remains restricted to authenticated users. Classic UI access by anonymous users is blocked at the Zope security layer without requiring any proxy configuration.
 
 ### Workflow states
 
-- Private: working draft, visible to editors only. Direct transitions to members only or published available.
-- Pending review: submitted for approval. Reviewer can restrict to members or publish.
-- Members only: teaser public, full content for authenticated users only.
-- Published: fully public, no restrictions.
+- **Private** — working draft, visible to editors only. Direct transitions to members only or published available.
+- **Pending review** — submitted for approval. Reviewer can restrict to members or publish.
+- **Members only** — teaser public, full content for authenticated users only.
+- **Published** — fully public, no restrictions.
 
-### Backend
+### Backend (collective.membersonly)
 
-- Custom members_only_workflow with four states and five transitions
-- A teaser browser view returning only safe fields for anonymous requests
-- Custom View Teaser permission granted to Anonymous in the members_only state
-- post_install handler creates the workflow programmatically on install
+- Custom `members_only_workflow` with four states and five transitions
+- `@@teaser` browser view returning only configured safe fields for anonymous requests
+- `@@teaser-image` browser view serving image scales protected by `View Teaser`
+- Custom `View Teaser` permission granted to Anonymous in the members_only state
+- `post_install` handler creates the workflow programmatically on install
+- Registry-based settings controlling which fields surface in the teaser
 
-### Frontend
+### Frontend (volto-members-only)
 
 - Custom 401 error view that detects members-only content and fetches the teaser
-- MembersOnlyTeaser component rendering title, description, preview image, and login CTA
-- Registered automatically via volto.config.js
+- `MembersOnlyTeaser` component rendering title, description, preview image, and login CTA
+- Full Open Graph and schema.org head markup including `isAccessibleForFree: false`
+- Registered automatically via `volto.config.js`
 
-## Current status
+### Configurable fields
 
-Complete: workflow definition, permission model, teaser backend endpoint, Volto teaser view component, automatic install handler, private GitHub repository.
+Site admins can configure which fields surface in the teaser via Site Setup under Members Only Settings. Available fields are description, preview_image, effective, creators, subjects, and language. Title and review_state are always included regardless of this setting.
 
-In progress: configurable field list via control panel, schema.org and Open Graph head markup, members only badge in listing and search results, uninstall profile cleanup.
+The teaser view reads the field list from the Plone registry at request time, so changes take effect immediately without restarting the server.
 
 ## Development setup
 
-Requires Plone 6.1.4+, Volto 18+, Python 3.11+, Node 22+ via nvm, and pnpm.
+### Requirements
 
-Backend runs at http://localhost:8080/Plone and frontend at http://localhost:3000.
+- Plone 6.1.4+
+- Volto 18+
+- Python 3.11+
+- Node 22+ (via nvm)
+- pnpm
+
+### Running locally
+
+```bash
+# Backend (terminal 1)
+make backend-install
+make backend-start
+
+# Frontend (terminal 2)
+make frontend-install
+make frontend-start
+```
+
+Backend runs at http://localhost:8080/Plone
+Frontend runs at http://localhost:3000
+
+### Development environment note
+
+In local development the backend runs on port 8080 and the frontend on port 3000. If you log in directly via the Plone interface at 8080, your browser session cookie may be sent with Volto's API requests, causing authenticated content to appear on port 3000 even for pages you expect to be gated.
+
+This is expected behaviour — an authenticated user should see full content. To test the anonymous teaser experience accurately, always use an incognito or private browsing window, which has no session cookies and replicates what Google's crawler and logged-out visitors see.
+
+In production there is only one URL and one login path through Volto, so this distinction does not arise.
+
+## Current status
+
+### Complete
+
+- Workflow definition with all states and transitions
+- Permission model (`View Teaser` for anonymous)
+- `@@teaser` backend endpoint with configurable field list
+- `@@teaser-image` backend endpoint for anonymous image access
+- Volto teaser view component with login CTA
+- Open Graph and schema.org head markup
+- Configurable field control panel in Site Setup
+- Private GitHub repository at juizi-com/plone-members-only
+
+### In progress
+
+- Uninstall profile cleanup
+- Members only badge in listing and search results
 
 ## Resolved limitations
 
-### Inline preview_image — resolved
+### Inline preview_image
 
 Plone's `@@images` view checks the `View` permission on the parent content object. Since anonymous users have `View Teaser` but not `View` on `members_only` content, serving inline images through `@@images` returned a 401.
 
