@@ -6,7 +6,7 @@
 
   <genericsetup:registerProfile
       name="default"
-      title="Plone Members Only: Install"
+      title="Plone Members Only"
       description="Gated content with public metadata teaser for Plone 6 / Volto sites"
       provides="Products.GenericSetup.interfaces.EXTENSION"
       directory="profiles/default"
