@@ -1,20 +1,10 @@
 from plone.restapi.services import Service
 from plone.restapi.serializer.converters import json_compatible
 from Products.CMFCore.utils import getToolByName
-from zope.interface import implementer
-from zope.publisher.interfaces import IPublishTraverse
 
 
-@implementer(IPublishTraverse)
 class TeaserView(Service):
     """Returns only public teaser fields for members-only content."""
-
-    TEASER_FIELDS = {
-        'title',
-        'description',
-        'effective',
-        'creators',
-    }
 
     def reply(self):
         obj = self.context
@@ -36,7 +26,6 @@ class TeaserView(Service):
         if hasattr(obj, 'creators'):
             result['creators'] = obj.creators
 
-        # Preview image
         if hasattr(obj, 'preview_image') and obj.preview_image:
             scales = obj.restrictedTraverse('@@images')
             try:
