@@ -5,7 +5,10 @@ from Products.DCWorkflow.DCWorkflow import DCWorkflowDefinition
 from Products.DCWorkflow.exportimport import WorkflowDefinitionConfigurator
 from Products.DCWorkflow.exportimport import _initDCWorkflow
 from Products.CMFCore.utils import getToolByName
+import logging
 import os
+
+logger = logging.getLogger('collective.membersonly')
 
 
 @implementer(INonInstallable)
@@ -68,3 +71,99 @@ def post_install(context):
         info[10],  # scripts
         None       # context
     )
+
+
+def uninstall(context):
+    """Uninstall handler — retracts members_only content to private with audit note,
+    then removes the workflow and cleans up registry records."""
+    from datetime import datetime
+    from DateTime import DateTime
+
+    portal = getSite()
+    wf_tool = getToolByName(portal, 'portal_workflow')
+    catalog = getToolByName(portal, 'portal_catalog')
+
+    # Determine fallback workflow
+    fallback_workflow = 'simple_publication_workflow'
+
+    # Find all content in members_only state before removing workflow
+    brains = catalog.searchResults(review_state='members_only')
+    retracted_paths = []
+
+    comment = (
+        f'This item was in "Members only" state when the '
+        f'collective.membersonly addon was uninstalled on '
+        f'{datetime.now().strftime("%Y-%m-%d %H:%M")}. '
+        f'It has been retracted to Private. Please review and '
+        f'republish as appropriate.'
+    )
+
+    for brain in brains:
+        try:
+            obj = brain.getObject()
+            wf_tool.doActionFor(obj, 'retract', comment=comment)
+            obj.reindexObject(idxs=['review_state'])
+            retracted_paths.append(brain.getPath())
+        except Exception as e:
+            logger.warning(f'Could not retract {brain.getPath()}: {e}')
+
+    if retracted_paths:
+        logger.info(
+            f'collective.membersonly uninstall: retracted {len(retracted_paths)} '
+            f'items to private: {", ".join(retracted_paths)}'
+        )
+
+    # Remove the workflow
+    if 'members_only_workflow' in list(wf_tool.objectIds()):
+        wf_tool._delObject('members_only_workflow')
+
+    # Reset default chain if it was members_only_workflow
+    if 'members_only_workflow' in wf_tool._default_chain:
+        wf_tool.setDefaultChain(fallback_workflow)
+        logger.info(
+            f'collective.membersonly uninstall: reset default workflow '
+            f'chain to {fallback_workflow}'
+        )
+
+    # Remove members_only_workflow from any explicit type bindings
+    chains = dict(wf_tool._chains_by_type)
+    for pt, wfs in chains.items():
+        if 'members_only_workflow' in wfs:
+            new_wfs = tuple(w for w in wfs if w != 'members_only_workflow')
+            wf_tool.setChainForPortalTypes([pt], list(new_wfs) or [fallback_workflow])
+
+    # Fix workflow history on any remaining orphaned items
+    all_brains = catalog.searchResults(portal_type=['Document', 'News Item', 'Folder'])
+    for brain in all_brains:
+        try:
+            obj = brain.getObject()
+            history = obj.workflow_history
+            if (
+                'members_only_workflow' in history
+                and fallback_workflow not in history
+            ):
+                history[fallback_workflow] = ({
+                    'action': None,
+                    'review_state': 'private',
+                    'comments': comment,
+                    'actor': 'admin',
+                    'time': DateTime(),
+                },)
+                obj.reindexObject(idxs=['review_state'])
+                logger.info(f'Fixed orphaned workflow history on {brain.getPath()}')
+        except Exception as e:
+            logger.warning(f'Could not fix workflow history on {brain.getPath()}: {e}')
+
+    # Remove registry records
+    try:
+        from plone.registry.interfaces import IRegistry
+        from zope.component import getUtility
+        registry = getUtility(IRegistry)
+        keys_to_remove = [
+            key for key in registry.records.keys()
+            if key.startswith('collective.membersonly')
+        ]
+        for key in keys_to_remove:
+            del registry.records[key]
+    except Exception as e:
+        logger.warning(f'Could not clean registry: {e}')

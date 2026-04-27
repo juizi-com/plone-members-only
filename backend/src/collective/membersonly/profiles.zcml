@@ -28,6 +28,7 @@
       description="Uninstall Plone Members Only setup."
       provides="Products.GenericSetup.interfaces.EXTENSION"
       directory="profiles/uninstall"
+      post_handler=".setuphandlers.uninstall"
       />
 
   <!-- Hide Uninstall Profile-->
