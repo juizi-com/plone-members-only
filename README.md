@@ -32,6 +32,7 @@ The addon introduces a custom permission — `Collective Members Only: View Teas
 - `@@teaser-image` browser view serving image scales protected by `View Teaser`
 - Custom `View Teaser` permission granted to Anonymous in the members_only state
 - `post_install` handler creates the workflow programmatically on install
+- `uninstall` handler safely retracts all members_only content before removing the workflow
 - Registry-based settings controlling which fields surface in the teaser
 
 ### Frontend (volto-members-only)
@@ -46,6 +47,20 @@ The addon introduces a custom permission — `Collective Members Only: View Teas
 Site admins can configure which fields surface in the teaser via Site Setup under Members Only Settings. Available fields are description, preview_image, effective, creators, subjects, and language. Title and review_state are always included regardless of this setting.
 
 The teaser view reads the field list from the Plone registry at request time, so changes take effect immediately without restarting the server.
+
+### Uninstall behaviour
+
+When the addon is uninstalled the handler:
+
+- Finds all content in `members_only` state and retracts it to `private`
+- Adds an audit comment to the workflow history of each affected item so editors know what happened and when
+- Resets the site default workflow chain if it was set to `members_only_workflow`
+- Removes `members_only_workflow` from any explicit content type bindings
+- Fixes orphaned workflow history on any remaining affected items
+- Removes the addon's registry records
+- Removes the Members Only entry from Site Setup
+
+The site is left in a clean state with all previously gated content safely private and all content types bound to their previous workflow.
 
 ## Development setup
 
@@ -91,11 +106,11 @@ In production there is only one URL and one login path through Volto, so this di
 - Volto teaser view component with login CTA
 - Open Graph and schema.org head markup
 - Configurable field control panel in Site Setup
+- Safe uninstall with content retraction and audit trail
 - Private GitHub repository at juizi-com/plone-members-only
 
-### In progress
+### Planned
 
-- Uninstall profile cleanup
 - Members only badge in listing and search results
 
 ## Resolved limitations
