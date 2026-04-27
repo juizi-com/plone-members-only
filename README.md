@@ -49,3 +49,13 @@ In progress: configurable field list via control panel, schema.org and Open Grap
 Requires Plone 6.1.4+, Volto 18+, Python 3.11+, Node 22+ via nvm, and pnpm.
 
 Backend runs at http://localhost:8080/Plone and frontend at http://localhost:3000.
+
+## Known limitations
+
+### Inline preview_image not served to anonymous users
+
+When content uses an inline `preview_image` field (stored directly on the content object), the image is not served to anonymous users in `members_only` state. This is because Plone's `@@images` view checks the `View` permission on the parent object, which anonymous users do not have.
+
+**Workaround:** Use `preview_image_link` instead, pointing to a separately published image object. This works correctly because the linked image has its own workflow state and `View` permission.
+
+**Planned fix:** A custom `@@teaser-image` view protected by `View Teaser` that serves scaled image bytes directly, bypassing the `View` permission check on the parent object.
