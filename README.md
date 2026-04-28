@@ -12,6 +12,52 @@ This is a common need for nonprofits and educational institutions that want to s
 
 This addon introduces a `members_only` workflow state that sits between private and published. Content in this state returns a 200 OK to anonymous users, serves only safe metadata fields via a dedicated teaser endpoint, serves full content to authenticated users, displays a teaser view in Volto with a login prompt, and appears in site search and listing results with meaningful titles and descriptions.
 
+## Installation
+
+This addon has two components — a Python backend package and a Volto frontend addon — both of which need to be installed separately.
+
+### 1. Backend
+
+Add `collective.membersonly` to your Plone project's Python dependencies. If you are using a `pyproject.toml` based setup:
+
+```toml
+dependencies = [
+    "collective.membersonly",
+]
+```
+
+Then install the package and restart your Plone instance. Once running, go to Site Setup and navigate to Add-ons. Find "Plone Members Only" in the available addons list and click Install.
+
+This will:
+- Register the `members_only_workflow` in your site's workflow tool
+- Add the `Collective Members Only: View Teaser` permission
+- Add the Members Only Settings entry to Site Setup
+- Register the `@@teaser` and `@@teaser-image` endpoints
+
+### 2. Frontend
+
+Add `volto-members-only` to your Volto project's `volto.config.js`:
+
+```javascript
+const addons = ['volto-members-only'];
+
+module.exports = {
+  addons,
+};
+```
+
+Then rebuild and restart your Volto frontend. This step is required — the teaser view, the 401 intercept, and the Open Graph head markup are all in the Volto addon and will not be active until it is listed here.
+
+### 3. Assign the workflow
+
+The addon does not automatically assign `members_only_workflow` to any content types — this is a deliberate site-level decision. After installing, go to Site Setup and navigate to Types. Select each content type you want to use with members-only gating and set its workflow to "Members Only Workflow". Alternatively, if you want all content types to use it by default, you can set it as the site default workflow in the portal_workflow ZMI at: http://yoursite.com/portal_workflow/manage_main
+
+Until this step is done, editors will not see the "Restrict to members" transition in the toolbar.
+
+### Verifying the installation
+
+With both components installed and the workflow assigned, create a new page and transition it to "Members only" via the workflow toolbar. Open the page in an incognito or private browsing window — you should see the teaser view with title, description, and preview image rather than the full page content.
+
 ## Architecture
 
 ### Security model
