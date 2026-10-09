@@ -22,14 +22,14 @@ class MembersOnlySerializeToJson(SerializeToJson):
     """Serialiser that returns only teaser fields for anonymous users
     when content is in the members_only workflow state."""
 
-    TEASER_FIELDS = {
+    TEASER_FIELDS = frozenset({
         "title",
         "description",
         "preview_image",
         "preview_image_link",
         "effective",
         "creators",
-    }
+    })
 
     def _is_members_only(self, obj):
         wf_tool = getToolByName(obj, "portal_workflow")
