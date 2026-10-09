@@ -1,7 +1,6 @@
 from plone.dexterity.interfaces import IDexterityContent
 from plone.restapi.interfaces import IJSONSummarySerializerMetadata
 from plone.restapi.interfaces import ISerializeToJson
-from plone.restapi.serializer.converters import json_compatible
 from plone.restapi.serializer.dxcontent import SerializeToJson
 from Products.CMFCore.utils import getToolByName
 from zope.component import adapter
