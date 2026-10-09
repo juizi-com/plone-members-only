@@ -18,7 +18,10 @@
 
   <include package=".controlpanels" />
 
-  <utility name="Subscriber" factory=".roles.SubscriberRole" />
+  <utility
+      factory=".roles.SubscriberRole"
+      name="Subscriber"
+      />
   <include package=".indexers" />
   <include package=".serializers" />
   <include package=".vocabularies" />

@@ -1,13 +1,13 @@
 <configure xmlns="http://namespaces.zope.org/zope">
 
   <permission
-    id="collective.membersonly.ViewTeaser"
-    title="Collective Members Only: View Teaser"
-  />
+      id="collective.membersonly.ViewTeaser"
+      title="Collective Members Only: View Teaser"
+      />
 
   <permission
-    id="collective.membersonly.DelegateSubscriber"
-    title="Sharing page: Delegate Subscriber role"
-  />
+      id="collective.membersonly.DelegateSubscriber"
+      title="Sharing page: Delegate Subscriber role"
+      />
 
 </configure>

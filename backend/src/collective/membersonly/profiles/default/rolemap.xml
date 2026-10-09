@@ -1,26 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rolemap>
   <roles>
-    <role name="Subscriber"/>
+    <role name="Subscriber" />
   </roles>
   <permissions>
-    <permission name="Collective Members Only: View Teaser" acquire="False">
-      <role name="Anonymous"/>
-      <role name="Authenticated"/>
-      <role name="Contributor"/>
-      <role name="Editor"/>
-      <role name="Manager"/>
-      <role name="Member"/>
-      <role name="Owner"/>
-      <role name="Reader"/>
-      <role name="Reviewer"/>
-      <role name="Site Administrator"/>
+    <permission acquire="False"
+                name="Collective Members Only: View Teaser"
+    >
+      <role name="Anonymous" />
+      <role name="Authenticated" />
+      <role name="Contributor" />
+      <role name="Editor" />
+      <role name="Manager" />
+      <role name="Member" />
+      <role name="Owner" />
+      <role name="Reader" />
+      <role name="Reviewer" />
+      <role name="Site Administrator" />
     </permission>
-    <permission name="Sharing page: Delegate Subscriber role" acquire="True">
-      <role name="Manager"/>
-      <role name="Site Administrator"/>
-      <role name="Owner"/>
-      <role name="Editor"/>
+    <permission acquire="True"
+                name="Sharing page: Delegate Subscriber role"
+    >
+      <role name="Manager" />
+      <role name="Site Administrator" />
+      <role name="Owner" />
+      <role name="Editor" />
     </permission>
   </permissions>
 </rolemap>

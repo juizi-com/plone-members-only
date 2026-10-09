@@ -12,7 +12,7 @@ class IMembersOnlySettings(model.Schema):
         description=(
             "On: everyone with an account reads members-only content (the "
             "Sharing tab shows the site shared with Logged-in users). Off: only "
-            "people and groups given \"Can view subscription content\" on the "
+            'people and groups given "Can view subscription content" on the '
             "Sharing tab, for example by a membership add-on."
         ),
         default=True,
@@ -27,19 +27,19 @@ class IMembersOnlySettings(model.Schema):
         ),
         value_type=schema.Choice(
             values=[
-                'description',
-                'preview_image',
-                'effective',
-                'creators',
-                'subjects',
-                'language',
+                "description",
+                "preview_image",
+                "effective",
+                "creators",
+                "subjects",
+                "language",
             ]
         ),
         default=[
-            'description',
-            'preview_image',
-            'effective',
-            'creators',
+            "description",
+            "preview_image",
+            "effective",
+            "creators",
         ],
         required=False,
     )
@@ -55,6 +55,7 @@ class MembersOnlyControlPanelForm(RegistryEditForm):
 class MembersOnlyControlPanelView(ControlPanelFormWrapper):
     form = MembersOnlyControlPanelForm
 
+
 from plone.restapi.controlpanels import RegistryConfigletPanel  # noqa: E402
 from zope.component import adapter  # noqa: E402
 from zope.interface import Interface as _Interface  # noqa: E402
@@ -63,6 +64,7 @@ from zope.interface import Interface as _Interface  # noqa: E402
 @adapter(_Interface, _Interface)
 class MembersOnlyConfigletPanel(RegistryConfigletPanel):
     """The same settings in Volto's Site Setup."""
+
     schema = IMembersOnlySettings
     schema_prefix = "collective.membersonly"
     configlet_id = "collective.membersonly"

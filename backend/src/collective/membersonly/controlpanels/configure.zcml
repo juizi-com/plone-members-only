@@ -12,11 +12,15 @@
       permission="cmf.ManagePortal"
       />
 
-  <adapter factory=".controlpanel.MembersOnlyConfigletPanel" name="members-only" />
+  <adapter
+      factory=".controlpanel.MembersOnlyConfigletPanel"
+      name="members-only"
+      />
 
   <subscriber
       for=".controlpanel.IMembersOnlySettings
            plone.registry.interfaces.IRecordModifiedEvent"
-      handler="..access.setting_changed" />
+      handler="..access.setting_changed"
+      />
 
 </configure>
