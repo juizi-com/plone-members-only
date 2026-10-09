@@ -36,6 +36,10 @@ class MembersOnlySerializeToJson(SerializeToJson):
         state = wf_tool.getInfoFor(obj, 'review_state', None)
         return state == 'members_only'
 
+    def _can_view(self, obj):
+        from AccessControl import getSecurityManager
+        return bool(getSecurityManager().checkPermission('View', obj))
+
     def _is_anonymous(self):
         from AccessControl import getSecurityManager
         user = getSecurityManager().getUser()
@@ -50,7 +54,9 @@ class MembersOnlySerializeToJson(SerializeToJson):
 
         obj = self.context
 
-        if self._is_members_only(obj) and self._is_anonymous():
+        # Not "is anonymous": logged-in people may lack access too, when
+        # content is shared with some groups only.
+        if self._is_members_only(obj) and not self._can_view(obj):
             teaser = {
                 '@id': result.get('@id'),
                 '@type': result.get('@type'),

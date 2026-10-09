@@ -1,3 +1,4 @@
+from collective.membersonly.access import access_message
 from plone.restapi.services import Service
 from plone.restapi.serializer.converters import json_compatible
 from plone.namedfile.scaling import ImageScaling
@@ -45,6 +46,8 @@ class TeaserView(Service):
             'review_state': state,
             'is_members_only': state == 'members_only',
             'title': obj.Title(),
+            # What this visitor is told and offered (login, joining...).
+            'access_message': access_message(obj, self.request),
         }
 
         if 'description' in teaser_fields:

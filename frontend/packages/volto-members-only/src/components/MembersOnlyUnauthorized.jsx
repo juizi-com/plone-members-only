@@ -13,16 +13,14 @@ const MembersOnlyUnauthorized = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      setLoading(false);
-      return;
-    }
-
+    // Logged-in people may lack access too (content shared with some
+    // groups only): they get the teaser and a message meant for them.
     const teaserUrl = `${config.settings.apiPath}/++api++${getBaseUrl(location.pathname)}/@@teaser`;
 
     fetch(teaserUrl, {
       headers: {
         Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     })
       .then((res) => {

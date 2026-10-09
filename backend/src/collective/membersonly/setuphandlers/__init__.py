@@ -27,12 +27,26 @@ class HiddenProfiles:
 
 
 def post_install(context):
-    """Post install script - creates the members_only_workflow."""
+    """Creates the members_only_workflow, and applies the "any logged-in
+    user" setting (on for a new install: the original behaviour)."""
     portal = getSite()
+    build_workflow(portal)
+    from plone import api
+    from collective.membersonly.access import apply_logged_in_setting
+    apply_logged_in_setting(bool(api.portal.get_registry_record(
+        'collective.membersonly.any_logged_in_user', default=True)), portal)
+
+
+def build_workflow(portal, replace=False):
+    """The workflow from definition.xml. replace=True rebuilds an existing
+    one (an upgrade changed the definition); content keeps its state,
+    which is stored on the content under the workflow's id."""
     wf_tool = getToolByName(portal, 'portal_workflow')
 
     if 'members_only_workflow' in list(wf_tool.objectIds()):
-        return
+        if not replace:
+            return
+        wf_tool._delObject('members_only_workflow')
 
     wf = DCWorkflowDefinition('members_only_workflow')
     wf_tool._setObject('members_only_workflow', wf)
