@@ -99,7 +99,11 @@ const MembersOnlyTeaser = ({ content }) => {
         )}
         {content.effective && (
           <p className="members-only-date">
-            {new Date(content.effective).toLocaleDateString()}
+            {new Date(content.effective).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
           </p>
         )}
         {content.creators?.length > 0 && (
