@@ -10,7 +10,7 @@ This is a common need for nonprofits and educational institutions that want to s
 
 ## The solution
 
-This addon introduces a `members_only` workflow state that sits between private and published. Content in this state returns a 200 OK to anonymous users, serves only safe metadata fields via a dedicated teaser endpoint, serves full content to authenticated users, displays a teaser view in Volto with a login prompt, and appears in site search and listing results with meaningful titles and descriptions.
+This addon introduces a `members_only` workflow state that sits between private and published. Content in this state returns a 200 OK to anonymous users, serves only safe metadata fields via a dedicated teaser endpoint, serves full content to the people it's shared with (or to any logged-in user, if the site keeps that setting on), displays a teaser view in Volto with a login prompt, and appears in site search and listing results with meaningful titles and descriptions.
 
 ## Installation
 
@@ -77,7 +77,7 @@ People who can't read a members-only item see its teaser and a message. By defau
 
 - **Private** — working draft, visible to editors only. Direct transitions to members only or published available.
 - **Pending review** — submitted for approval. Reviewer can restrict to members or publish.
-- **Members only** — teaser public, full content for authenticated users only.
+- **Members only** — teaser public; full content for people with "Can view subscription content" on the item or above it (any logged-in user while that setting is on).
 - **Published** — fully public, no restrictions.
 
 ### Backend (collective.membersonly)
@@ -93,7 +93,7 @@ People who can't read a members-only item see its teaser and a message. By defau
 ### Frontend (volto-members-only)
 
 - Custom 401 error view that detects members-only content and fetches the teaser
-- `MembersOnlyTeaser` component rendering title, description, preview image, and login CTA
+- `MembersOnlyTeaser` component rendering title, description, preview image, the access message and its actions (dates read day-month-year, e.g. 9 October 2026)
 - Full Open Graph and schema.org head markup including `isAccessibleForFree: false`
 - Registered automatically via `volto.config.js`
 
@@ -160,7 +160,9 @@ In production there is only one URL and one login path through Volto, so this di
 - `@@teaser-image` backend endpoint for anonymous image access
 - Volto teaser view component with login CTA
 - Open Graph and schema.org head markup
-- Configurable field control panel in Site Setup
+- Configurable field control panel in Site Setup (Classic and Volto)
+- Subscriber role ("Can view subscription content") and the "Any logged-in user can view members-only content" setting
+- Access message extension point (`IAccessMessage`), used by collective.membership
 - Safe uninstall with content retraction and audit trail
 - Private GitHub repository at juizi-com/plone-members-only
 
