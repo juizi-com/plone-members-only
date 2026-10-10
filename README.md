@@ -62,7 +62,16 @@ With both components installed and the workflow assigned, create a new page and 
 
 ### Security model
 
-The addon introduces a custom permission — `Collective Members Only: View Teaser` — granted to Anonymous in the `members_only` workflow state. The standard `View` permission remains restricted to authenticated users. Classic UI access by anonymous users is blocked at the Zope security layer without requiring any proxy configuration.
+The addon introduces a custom permission — `Collective Members Only: View Teaser` — granted to Anonymous in the `members_only` workflow state. The standard `View` permission goes to the **Subscriber** role, shown on the Sharing tab as **"Can view subscription content"** (and to Reader, "Can view"). Classic UI access by anonymous users is blocked at the Zope security layer without requiring any proxy configuration.
+
+- Share a page or folder with people or groups in the "Can view subscription content" column to let them read its members-only content. Sharing on a folder applies to its contents unless "Inherit permissions" is switched off.
+- In the private and pending states the role grants nothing, so unpublished items in a shared folder stay hidden.
+- **"Any logged-in user can view members-only content"** (Members Only settings, on by default) shares the site root with Logged-in users in that column: the original behaviour, where any account reads members-only content. Switch it off when access should depend on groups, for example with collective.membership.
+- Upgrading to profile version 1001 keeps existing sites as they were: the setting is switched on.
+
+### Access message
+
+People who can't read a members-only item see its teaser and a message. By default that's "This content is available to members only" with a login button for anonymous visitors, and "You don't have access to this content" for logged-in people. An add-on can replace it by registering a utility for `collective.membersonly.interfaces.IAccessMessage` that returns `{'text': ..., 'actions': [{'label': ..., 'url': ...}]}`; collective.membership does, naming the plans that include the content.
 
 ### Workflow states
 

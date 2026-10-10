@@ -10,26 +10,34 @@
   <permission>View</permission>
   <permission>Collective Members Only: View Teaser</permission>
 
-  <state state_id="private" title="Private">
+  <state state_id="private"
+         title="Private"
+  >
     <description>Only visible to editors.</description>
-    <exit-transition transition_id="submit"/>
-    <exit-transition transition_id="restrict_to_members"/>
-    <exit-transition transition_id="publish"/>
-    <permission-map name="Access contents information" acquired="False">
+    <exit-transition transition_id="submit" />
+    <exit-transition transition_id="restrict_to_members" />
+    <exit-transition transition_id="publish" />
+    <permission-map acquired="False"
+                    name="Access contents information"
+    >
       <permission-role>Manager</permission-role>
       <permission-role>Owner</permission-role>
       <permission-role>Editor</permission-role>
       <permission-role>Contributor</permission-role>
       <permission-role>Site Administrator</permission-role>
     </permission-map>
-    <permission-map name="View" acquired="False">
+    <permission-map acquired="False"
+                    name="View"
+    >
       <permission-role>Manager</permission-role>
       <permission-role>Owner</permission-role>
       <permission-role>Editor</permission-role>
       <permission-role>Contributor</permission-role>
       <permission-role>Site Administrator</permission-role>
     </permission-map>
-    <permission-map name="Collective Members Only: View Teaser" acquired="False">
+    <permission-map acquired="False"
+                    name="Collective Members Only: View Teaser"
+    >
       <permission-role>Manager</permission-role>
       <permission-role>Owner</permission-role>
       <permission-role>Editor</permission-role>
@@ -37,26 +45,34 @@
     </permission-map>
   </state>
 
-  <state state_id="pending" title="Pending review">
+  <state state_id="pending"
+         title="Pending review"
+  >
     <description>Awaiting review before publication.</description>
-    <exit-transition transition_id="restrict_to_members"/>
-    <exit-transition transition_id="publish"/>
-    <exit-transition transition_id="retract"/>
-    <permission-map name="Access contents information" acquired="False">
+    <exit-transition transition_id="restrict_to_members" />
+    <exit-transition transition_id="publish" />
+    <exit-transition transition_id="retract" />
+    <permission-map acquired="False"
+                    name="Access contents information"
+    >
       <permission-role>Manager</permission-role>
       <permission-role>Owner</permission-role>
       <permission-role>Editor</permission-role>
       <permission-role>Reviewer</permission-role>
       <permission-role>Site Administrator</permission-role>
     </permission-map>
-    <permission-map name="View" acquired="False">
+    <permission-map acquired="False"
+                    name="View"
+    >
       <permission-role>Manager</permission-role>
       <permission-role>Owner</permission-role>
       <permission-role>Editor</permission-role>
       <permission-role>Reviewer</permission-role>
       <permission-role>Site Administrator</permission-role>
     </permission-map>
-    <permission-map name="Collective Members Only: View Teaser" acquired="False">
+    <permission-map acquired="False"
+                    name="Collective Members Only: View Teaser"
+    >
       <permission-role>Manager</permission-role>
       <permission-role>Owner</permission-role>
       <permission-role>Editor</permission-role>
@@ -65,11 +81,15 @@
     </permission-map>
   </state>
 
-  <state state_id="members_only" title="Members only">
+  <state state_id="members_only"
+         title="Members only"
+  >
     <description>Teaser visible publicly, full content for authenticated users only.</description>
-    <exit-transition transition_id="publish"/>
-    <exit-transition transition_id="retract"/>
-    <permission-map name="Access contents information" acquired="False">
+    <exit-transition transition_id="publish" />
+    <exit-transition transition_id="retract" />
+    <permission-map acquired="False"
+                    name="Access contents information"
+    >
       <permission-role>Anonymous</permission-role>
       <permission-role>Authenticated</permission-role>
       <permission-role>Manager</permission-role>
@@ -78,15 +98,20 @@
       <permission-role>Reviewer</permission-role>
       <permission-role>Site Administrator</permission-role>
     </permission-map>
-    <permission-map name="View" acquired="False">
-      <permission-role>Authenticated</permission-role>
+    <permission-map acquired="False"
+                    name="View"
+    >
+      <permission-role>Subscriber</permission-role>
+      <permission-role>Reader</permission-role>
       <permission-role>Manager</permission-role>
       <permission-role>Owner</permission-role>
       <permission-role>Editor</permission-role>
       <permission-role>Reviewer</permission-role>
       <permission-role>Site Administrator</permission-role>
     </permission-map>
-    <permission-map name="Collective Members Only: View Teaser" acquired="False">
+    <permission-map acquired="False"
+                    name="Collective Members Only: View Teaser"
+    >
       <permission-role>Anonymous</permission-role>
       <permission-role>Authenticated</permission-role>
       <permission-role>Manager</permission-role>
@@ -97,11 +122,15 @@
     </permission-map>
   </state>
 
-  <state state_id="published" title="Published">
+  <state state_id="published"
+         title="Published"
+  >
     <description>Fully public.</description>
-    <exit-transition transition_id="retract"/>
-    <exit-transition transition_id="retract_to_members"/>
-    <permission-map name="Access contents information" acquired="False">
+    <exit-transition transition_id="retract" />
+    <exit-transition transition_id="retract_to_members" />
+    <permission-map acquired="False"
+                    name="Access contents information"
+    >
       <permission-role>Anonymous</permission-role>
       <permission-role>Authenticated</permission-role>
       <permission-role>Manager</permission-role>
@@ -110,7 +139,9 @@
       <permission-role>Reviewer</permission-role>
       <permission-role>Site Administrator</permission-role>
     </permission-map>
-    <permission-map name="View" acquired="False">
+    <permission-map acquired="False"
+                    name="View"
+    >
       <permission-role>Anonymous</permission-role>
       <permission-role>Authenticated</permission-role>
       <permission-role>Manager</permission-role>
@@ -119,7 +150,9 @@
       <permission-role>Reviewer</permission-role>
       <permission-role>Site Administrator</permission-role>
     </permission-map>
-    <permission-map name="Collective Members Only: View Teaser" acquired="False">
+    <permission-map acquired="False"
+                    name="Collective Members Only: View Teaser"
+    >
       <permission-role>Anonymous</permission-role>
       <permission-role>Authenticated</permission-role>
       <permission-role>Manager</permission-role>
@@ -210,11 +243,15 @@
     </guard>
   </transition>
 
-  <worklist worklist_id="reviewer_queue" title="Reviewer tasks">
+  <worklist title="Reviewer tasks"
+            worklist_id="reviewer_queue"
+  >
     <guard>
       <guard-permission>Review portal content</guard-permission>
     </guard>
-    <match name="review_state" values="pending"/>
+    <match name="review_state"
+           values="pending"
+    />
   </worklist>
 
   <variable for_catalog="False"
@@ -226,7 +263,7 @@
     <default>
       <expression>transition/getId|nothing</expression>
     </default>
-    <guard></guard>
+    <guard />
   </variable>
 
   <variable for_catalog="False"
@@ -238,7 +275,7 @@
     <default>
       <expression>user/getId</expression>
     </default>
-    <guard></guard>
+    <guard />
   </variable>
 
   <variable for_catalog="False"
@@ -250,7 +287,7 @@
     <default>
       <expression>python:state_change.kwargs.get('comment', '')</expression>
     </default>
-    <guard></guard>
+    <guard />
   </variable>
 
   <variable for_catalog="False"
@@ -276,7 +313,7 @@
     <default>
       <expression>state_change/getDateTime</expression>
     </default>
-    <guard></guard>
+    <guard />
   </variable>
 
 </dc-workflow>

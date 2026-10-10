@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { Helmet } from '@plone/volto/helpers';
 import { getBaseUrl, flattenToAppURL } from '@plone/volto/helpers/Url/Url';
 import config from '@plone/volto/registry';
+import { UniversalLink } from '@plone/volto/components';
 
 const MembersOnlyTeaser = ({ content }) => {
   const location = useLocation();
@@ -28,6 +29,8 @@ const MembersOnlyTeaser = ({ content }) => {
   };
 
   const ogImage = getImageUrl(content.preview_image?.download);
+  // From the backend: the login prompt, or a membership add-on's message.
+  const message = content.access_message;
 
   return (
     <>
@@ -96,23 +99,52 @@ const MembersOnlyTeaser = ({ content }) => {
         )}
         {content.effective && (
           <p className="members-only-date">
-            {new Date(content.effective).toLocaleDateString()}
+            {new Date(content.effective).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
           </p>
         )}
         {content.creators?.length > 0 && (
           <p className="members-only-creators">{content.creators.join(', ')}</p>
         )}
         <div className="members-only-gate">
-          <p>This content is available to members only.</p>
-          <Link
-            to={{
-              pathname: loginUrl,
-              state: { next: location.pathname },
-            }}
-            className="ui button primary"
-          >
-            Log in to read
-          </Link>
+          {message ? (
+            <>
+              <p>{message.text}</p>
+              {(message.actions || []).length > 0 && (
+                <p className="members-only-actions">
+                  {message.actions.map((action) => (
+                    <UniversalLink
+                      key={action.url}
+                      href={
+                        action.url.endsWith('/login')
+                          ? `${loginUrl}?return_url=${encodeURIComponent(location.pathname)}`
+                          : action.url
+                      }
+                      className="ui button primary"
+                    >
+                      {action.label}
+                    </UniversalLink>
+                  ))}
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <p>This content is available to members only.</p>
+              <Link
+                to={{
+                  pathname: loginUrl,
+                  state: { next: location.pathname },
+                }}
+                className="ui button primary"
+              >
+                Log in to read
+              </Link>
+            </>
+          )}
         </div>
       </Container>
     </>

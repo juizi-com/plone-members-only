@@ -17,6 +17,11 @@
   <include file="permissions.zcml" />
 
   <include package=".controlpanels" />
+
+  <utility
+      factory=".roles.SubscriberRole"
+      name="Subscriber"
+      />
   <include package=".indexers" />
   <include package=".serializers" />
   <include package=".vocabularies" />
