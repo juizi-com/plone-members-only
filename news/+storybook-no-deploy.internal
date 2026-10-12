@@ -1,0 +1,1 @@
+CI builds Storybook as a check but no longer deploys it to GitHub Pages (the repo has no Pages site, and the workflow token can't push gh-pages). @karel
