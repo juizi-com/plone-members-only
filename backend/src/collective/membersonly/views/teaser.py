@@ -17,93 +17,99 @@ DEFAULT_TEASER_FIELDS = {
 }
 
 
+def teaser_fields():
+    try:
+        registry = getUtility(IRegistry)
+        fields = registry.get("collective.membersonly.teaser_fields", None)
+        if fields is not None:
+            return set(fields)
+    except Exception:
+        pass
+    return DEFAULT_TEASER_FIELDS
+
+
+def teaser_data(obj, request):
+    """Only the public teaser fields of members-only content, and what this
+    visitor is told and offered."""
+    wf_tool = getToolByName(obj, "portal_workflow")
+    state = wf_tool.getInfoFor(obj, "review_state", None)
+
+    fields = teaser_fields()
+
+    result = {
+        "@id": obj.absolute_url(),
+        "@type": obj.portal_type,
+        "review_state": state,
+        "is_members_only": state == "members_only",
+        "title": obj.Title(),
+        # What this visitor is told and offered (login, joining...).
+        "access_message": access_message(obj, request),
+    }
+
+    if "description" in fields:
+        result["description"] = obj.Description()
+
+    if "effective" in fields:
+        if hasattr(obj, "effective_date") and obj.effective_date:
+            result["effective"] = json_compatible(obj.effective_date)
+
+    if "creators" in fields:
+        if hasattr(obj, "creators"):
+            result["creators"] = obj.creators
+
+    if "subjects" in fields:
+        if hasattr(obj, "subject"):
+            result["subjects"] = obj.subject
+
+    if "language" in fields:
+        if hasattr(obj, "language"):
+            result["language"] = obj.language
+
+    if "preview_image" in fields:
+        # Inline preview_image
+        if hasattr(obj, "preview_image") and obj.preview_image:
+            base_url = obj.absolute_url()
+            result["preview_image"] = {
+                "download": f"{base_url}/@@teaser-image/preview_image/large",
+            }
+
+        # Preview image link
+        if not result.get("preview_image"):
+            try:
+                preview_image_link = getattr(obj, "preview_image_link", None)
+                if preview_image_link:
+                    target = preview_image_link.to_object
+                    if target is not None:
+                        scales = target.restrictedTraverse("@@images")
+                        scale = scales.scale("image", scale="large")
+                        if scale:
+                            result["preview_image"] = {
+                                "download": scale.url,
+                                "width": scale.width,
+                                "height": scale.height,
+                            }
+            except Exception:
+                pass
+
+        # Lead image (News Item)
+        if not result.get("preview_image"):
+            try:
+                if hasattr(obj, "image") and obj.image:
+                    base_url = obj.absolute_url()
+                    result["preview_image"] = {
+                        "download": f"{base_url}/@@teaser-image/image/large",
+                    }
+            except Exception:
+                pass
+
+    return result
+
+
 class TeaserView(Service):
     """Returns only public teaser fields for members-only content."""
 
-    def _get_teaser_fields(self):
-        try:
-            registry = getUtility(IRegistry)
-            fields = registry.get("collective.membersonly.teaser_fields", None)
-            if fields is not None:
-                return set(fields)
-        except Exception:
-            pass
-        return DEFAULT_TEASER_FIELDS
-
     def reply(self):
-        obj = self.context
-        wf_tool = getToolByName(obj, "portal_workflow")
-        state = wf_tool.getInfoFor(obj, "review_state", None)
-
-        teaser_fields = self._get_teaser_fields()
-
-        result = {
-            "@id": obj.absolute_url(),
-            "@type": obj.portal_type,
-            "review_state": state,
-            "is_members_only": state == "members_only",
-            "title": obj.Title(),
-            # What this visitor is told and offered (login, joining...).
-            "access_message": access_message(obj, self.request),
-        }
-
-        if "description" in teaser_fields:
-            result["description"] = obj.Description()
-
-        if "effective" in teaser_fields:
-            if hasattr(obj, "effective_date") and obj.effective_date:
-                result["effective"] = json_compatible(obj.effective_date)
-
-        if "creators" in teaser_fields:
-            if hasattr(obj, "creators"):
-                result["creators"] = obj.creators
-
-        if "subjects" in teaser_fields:
-            if hasattr(obj, "subject"):
-                result["subjects"] = obj.subject
-
-        if "language" in teaser_fields:
-            if hasattr(obj, "language"):
-                result["language"] = obj.language
-
-        if "preview_image" in teaser_fields:
-            # Inline preview_image
-            if hasattr(obj, "preview_image") and obj.preview_image:
-                base_url = obj.absolute_url()
-                result["preview_image"] = {
-                    "download": f"{base_url}/@@teaser-image/preview_image/large",
-                }
-
-            # Preview image link
-            if not result.get("preview_image"):
-                try:
-                    preview_image_link = getattr(obj, "preview_image_link", None)
-                    if preview_image_link:
-                        target = preview_image_link.to_object
-                        if target is not None:
-                            scales = target.restrictedTraverse("@@images")
-                            scale = scales.scale("image", scale="large")
-                            if scale:
-                                result["preview_image"] = {
-                                    "download": scale.url,
-                                    "width": scale.width,
-                                    "height": scale.height,
-                                }
-                except Exception:
-                    pass
-
-            # Lead image (News Item)
-            if not result.get("preview_image"):
-                try:
-                    if hasattr(obj, "image") and obj.image:
-                        base_url = obj.absolute_url()
-                        result["preview_image"] = {
-                            "download": f"{base_url}/@@teaser-image/image/large",
-                        }
-                except Exception:
-                    pass
-
-        return result
+        return teaser_data(self.context, self.request)
 
 
 @implementer(IPublishTraverse)

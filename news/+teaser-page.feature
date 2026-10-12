@@ -1,0 +1,1 @@
+Members-only content someone can't read now comes from GET as a teaser page (layout `members_only_teaser`) instead of a 401, with the usual `@components`, so Volto shows the site's navigation, breadcrumbs, actions and inherited settings around it. Only the teaser fields are sent; other content still needs View. @karel

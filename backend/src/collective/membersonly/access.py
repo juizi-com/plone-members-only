@@ -37,6 +37,22 @@ def setting_changed(settings, event):
         apply_logged_in_setting(bool(event.newValue))
 
 
+def is_members_only(obj):
+    wf_tool = api.portal.get_tool("portal_workflow")
+    return wf_tool.getInfoFor(obj, "review_state", None) == "members_only"
+
+
+def can_view(obj):
+    from AccessControl import getSecurityManager
+
+    return bool(getSecurityManager().checkPermission("View", obj))
+
+
+def gets_teaser(obj):
+    """Members-only content this person can't read: they get the teaser."""
+    return is_members_only(obj) and not can_view(obj)
+
+
 def default_message(context, request):
     login = f"{context.absolute_url()}/login"
     if api.user.is_anonymous():
