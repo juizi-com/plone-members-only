@@ -1,0 +1,1 @@
+Members-only content someone can't read is shown with the `members_only_teaser` view, as a normal page: the fat menu, breadcrumbs and Log in link work as on any other page. The 401 view stays for older backends. @karel

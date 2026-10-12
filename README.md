@@ -46,7 +46,7 @@ module.exports = {
 };
 ```
 
-Then rebuild and restart your Volto frontend. This step is required — the teaser view, the 401 intercept, and the Open Graph head markup are all in the Volto addon and will not be active until it is listed here.
+Then rebuild and restart your Volto frontend. This step is required — the teaser view and the Open Graph head markup are all in the Volto addon and will not be active until it is listed here.
 
 ### 3. Assign the workflow
 
@@ -83,6 +83,7 @@ People who can't read a members-only item see its teaser and a message. By defau
 ### Backend (collective.membersonly)
 
 - Custom `members_only_workflow` with four states and five transitions
+- Content GET (plone.restapi) answers people who can't read members-only content with its teaser as a page (layout `members_only_teaser`) rather than a 401, keeping `@components` (navigation, breadcrumbs, actions, inherited settings) so the site's header and menus work around it; all other content still needs View
 - `@@teaser` browser view returning only configured safe fields for anonymous requests
 - `@@teaser-image` browser view serving image scales protected by `View Teaser`
 - Custom `View Teaser` permission granted to Anonymous in the members_only state
@@ -92,7 +93,8 @@ People who can't read a members-only item see its teaser and a message. By defau
 
 ### Frontend (volto-members-only)
 
-- Custom 401 error view that detects members-only content and fetches the teaser
+- `members_only_teaser` view for the teaser page the backend sends
+- A 401 error view that detects members-only content and fetches the teaser, for backends without the teaser page
 - `MembersOnlyTeaser` component rendering title, description, preview image, the access message and its actions (dates read day-month-year, e.g. 9 October 2026)
 - Full Open Graph and schema.org head markup including `isAccessibleForFree: false`
 - Registered automatically via `volto.config.js`

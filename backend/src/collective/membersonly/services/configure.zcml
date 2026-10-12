@@ -1,0 +1,16 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    >
+
+  <!-- Members-only content: the teaser rather than a 401 for people who
+       can't view it. -->
+  <plone:service
+      method="GET"
+      factory=".content.MembersOnlyContentGet"
+      for="plone.dexterity.interfaces.IDexterityContent"
+      permission="collective.membersonly.ViewTeaser"
+      layer="collective.membersonly.interfaces.IBrowserLayer"
+      />
+
+</configure>
