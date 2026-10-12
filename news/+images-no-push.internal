@@ -1,0 +1,1 @@
+CI builds the backend and frontend container images as a check but no longer pushes them (the template's ghcr.io/collective image name isn't ours to push to). @karel

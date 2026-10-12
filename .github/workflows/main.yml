@@ -51,6 +51,9 @@ jobs:
         image-name-suffix: frontend
         node-version: ${{ needs.config.outputs.node-version }}
         volto-version: ${{ needs.config.outputs.volto-version }}
+        # Build Storybook as a check, but don't publish it: the repo has no
+        # GitHub Pages site, and the workflow token can't push gh-pages.
+        storybook-deploy: false
     if: ${{ needs.config.outputs.frontend == 'true' }}
     permissions:
       contents: read

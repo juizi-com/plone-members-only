@@ -71,7 +71,10 @@ jobs:
       working-directory: ${{ inputs.working-directory }}
       build-args: |
         PLONE_VERSION=${{ inputs.plone-version }}
-      push: ${{ github.event_name != 'pull_request' }}
+      # Built as a check, not published: the template's image name
+      # (ghcr.io/collective/...) isn't ours to push to, and an add-on
+      # repo needs no images.
+      push: false
     secrets:
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}

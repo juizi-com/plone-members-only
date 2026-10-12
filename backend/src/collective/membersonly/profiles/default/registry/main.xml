@@ -3,8 +3,11 @@
           i18n:domain="collective.membersonly"
 >
   <records interface="collective.membersonly.controlpanels.controlpanel.IMembersOnlySettings"
-           prefix="collective.membersonly">
-    <value key="teaser_fields" purge="false">
+           prefix="collective.membersonly"
+  >
+    <value key="teaser_fields"
+           purge="false"
+    >
       <element>description</element>
       <element>preview_image</element>
       <element>effective</element>
