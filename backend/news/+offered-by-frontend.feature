@@ -1,0 +1,1 @@
+Site Setup → Add-ons offers it only on sites whose frontend includes volto-members-only: the backend leaves it out of the add-ons list until it's installed on the site, and the Volto add-on adds it back (one backend can serve several sites; without the frontend part, visitors would get teaser data with no teaser page). Once installed it's listed as usual. @karel

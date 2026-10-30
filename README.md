@@ -28,7 +28,9 @@ dependencies = [
 
 The package loads through plone.autoinclude like any other add-on. It has no load-order requirement and needs no `zcml_package_includes` entry; it runs alongside other add-ons, also on a backend that serves several sites. (Before plone-members-only#6, its `overrides.zcml` made Zope refuse to start when another package loaded plone.restapi first.)
 
-Then install the package and restart your Plone instance. Once running, go to Site Setup and navigate to Add-ons. Find "Plone Members Only" in the available addons list and click Install.
+Then install the package and restart your Plone instance. Once the frontend add-on (step 2) is in place too, go to Site Setup → Add-ons, find "Plone Members Only" among the available add-ons and click Install.
+
+Site Setup → Add-ons lists it only on a frontend that includes `volto-members-only` (step 2). The backend leaves it out of its add-ons list until it's installed on the site (`setuphandlers.HiddenProfiles`): one backend can serve several sites, and only those whose frontend has the Volto add-on can use it (without it, visitors would get the teaser data with no teaser page), so that frontend adds it to the list itself (`frontend/packages/volto-members-only/src/offerAddon.js`). Once installed it's listed as usual, for upgrades and uninstalling. A policy profile that depends on it still installs it directly.
 
 This will:
 - Register the `members_only_workflow` in your site's workflow tool
@@ -99,6 +101,7 @@ People who can't read a members-only item see its teaser and a message. By defau
 - A 401 error view that detects members-only content and fetches the teaser, for backends without the teaser page
 - `MembersOnlyTeaser` component rendering title, description, preview image, the access message and its actions (dates read day-month-year, e.g. 9 October 2026)
 - Full Open Graph and schema.org head markup including `isAccessibleForFree: false`
+- Offers collective.membersonly in Site Setup → Add-ons (`offerAddon.js`), which the backend leaves out of the list until it is installed on the site; it wraps any add-ons reducer configured before it
 - Registered automatically via `volto.config.js`
 
 ### Configurable fields
