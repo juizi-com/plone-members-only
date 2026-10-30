@@ -28,7 +28,6 @@
   <include package=".vocabularies" />
 
   <!-- -*- extra stuff goes here -*- -->
-  <includeOverrides file="overrides.zcml" />
   <include package=".views" />
 
 </configure>
