@@ -26,6 +26,8 @@ dependencies = [
 ]
 ```
 
+The package loads through plone.autoinclude like any other add-on. It has no load-order requirement and needs no `zcml_package_includes` entry; it runs alongside other add-ons, also on a backend that serves several sites. (Before plone-members-only#6, its `overrides.zcml` made Zope refuse to start when another package loaded plone.restapi first.)
+
 Then install the package and restart your Plone instance. Once running, go to Site Setup and navigate to Add-ons. Find "Plone Members Only" in the available addons list and click Install.
 
 This will:
