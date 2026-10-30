@@ -7,7 +7,7 @@
   <genericsetup:registerProfile
       name="default"
       title="Plone Members Only"
-      description="Gated content with public metadata teaser for Plone 6 / Volto sites"
+      description="Gated content with public metadata teaser for Plone 6 / Volto sites. Needs the volto-members-only frontend add-on."
       provides="Products.GenericSetup.interfaces.EXTENSION"
       directory="profiles/default"
       post_handler=".setuphandlers.post_install"

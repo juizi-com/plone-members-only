@@ -30,6 +30,8 @@ The package loads through plone.autoinclude like any other add-on. It has no loa
 
 Then install the package and restart your Plone instance. Once running, go to Site Setup and navigate to Add-ons. Find "Plone Members Only" in the available addons list and click Install.
 
+Site Setup → Add-ons lists it only on a frontend that includes `volto-members-only` (step 2). The backend leaves it out of its add-ons list until it's installed on the site (`setuphandlers.HiddenProfiles`): one backend can serve several sites, and only those whose frontend has the Volto add-on can use it (without it, visitors would get the teaser data with no teaser page), so that frontend adds it to the list itself (`frontend/packages/volto-members-only/src/offerAddon.js`). Once installed it's listed as usual, for upgrades and uninstalling. A policy profile that depends on it still installs it directly.
+
 This will:
 - Register the `members_only_workflow` in your site's workflow tool
 - Add the `Collective Members Only: View Teaser` permission

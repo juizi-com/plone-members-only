@@ -3,6 +3,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.DCWorkflow.DCWorkflow import DCWorkflowDefinition
 from Products.DCWorkflow.exportimport import _initDCWorkflow
 from Products.DCWorkflow.exportimport import WorkflowDefinitionConfigurator
+from Products.GenericSetup.tool import UNKNOWN
 from zope.component.hooks import getSite
 from zope.interface import implementer
 
@@ -11,6 +12,20 @@ import os
 
 
 logger = logging.getLogger("collective.membersonly")
+
+DEFAULT_PROFILE = "collective.membersonly:default"
+
+
+def is_installed_here():
+    """Whether collective.membersonly is installed on the current site.
+
+    Read from portal_setup directly: asking Plone's installer would ask this
+    utility again (it checks the non-installable lists).
+    """
+    setup = getToolByName(getSite(), "portal_setup", None)
+    if setup is None:
+        return False
+    return setup.getLastVersionForProfile(DEFAULT_PROFILE) != UNKNOWN
 
 
 @implementer(INonInstallable)
@@ -22,10 +37,21 @@ class HiddenProfiles:
         ]
 
     def getNonInstallableProducts(self):
-        """Hide the upgrades package from site-creation and quickinstaller."""
-        return [
-            "collective.membersonly.upgrades",
-        ]
+        """Hide the upgrades package from site-creation and quickinstaller.
+
+        collective.membersonly itself is left out of the backend's add-ons
+        list until it is installed on the site. Several sites can share one
+        backend, and only the ones whose frontend includes volto-members-only
+        can use it (without it, visitors get the teaser data with no teaser
+        page to show it): that frontend adds it to Site Setup → Add-ons
+        itself, and Volto's usual Install button installs it (a hidden
+        product can still be installed by name). Once installed, it is listed
+        as usual, for upgrades and uninstalling.
+        """
+        hidden = ["collective.membersonly.upgrades"]
+        if not is_installed_here():
+            hidden.append("collective.membersonly")
+        return hidden
 
 
 def post_install(context):
