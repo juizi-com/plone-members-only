@@ -1,0 +1,1 @@
+Plone no longer refuses to start when another add-on loads plone.restapi before this one: the content serializer override (`overrides.zcml`) is gone. The teaser GET, which only runs on sites with the add-on installed, already sends the teaser without serializing the content, so nothing else changes. @karel
