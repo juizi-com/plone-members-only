@@ -1,15 +1,14 @@
 import React from 'react';
 import { Container, Image } from 'semantic-ui-react';
-import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { Helmet } from '@plone/volto/helpers';
-import { getBaseUrl, flattenToAppURL } from '@plone/volto/helpers/Url/Url';
+import { flattenToAppURL } from '@plone/volto/helpers/Url/Url';
 import config from '@plone/volto/registry';
-import { UniversalLink } from '@plone/volto/components';
+import MembersOnlyGate from './MembersOnlyGate';
+import { gatingJsonLd } from '../helpers';
 
 const MembersOnlyTeaser = ({ content }) => {
   const location = useLocation();
-  const loginUrl = `${getBaseUrl(location.pathname)}/login`;
   const siteUrl = config.settings.publicURL || config.settings.apiPath;
   const canonicalUrl = `${siteUrl}${location.pathname}`;
 
@@ -29,8 +28,6 @@ const MembersOnlyTeaser = ({ content }) => {
   };
 
   const ogImage = getImageUrl(content.preview_image?.download);
-  // From the backend: the login prompt, or a membership add-on's message.
-  const message = content.access_message;
 
   return (
     <>
@@ -71,12 +68,7 @@ const MembersOnlyTeaser = ({ content }) => {
               '@type': 'Person',
               name: c,
             })),
-            isAccessibleForFree: false,
-            hasPart: {
-              '@type': 'WebPageElement',
-              isAccessibleForFree: false,
-              cssSelector: '.members-only-gate',
-            },
+            ...gatingJsonLd(content),
             ...(ogImage ? { image: ogImage } : {}),
           })}
         </script>
@@ -109,43 +101,7 @@ const MembersOnlyTeaser = ({ content }) => {
         {content.creators?.length > 0 && (
           <p className="members-only-creators">{content.creators.join(', ')}</p>
         )}
-        <div className="members-only-gate">
-          {message ? (
-            <>
-              <p>{message.text}</p>
-              {(message.actions || []).length > 0 && (
-                <p className="members-only-actions">
-                  {message.actions.map((action) => (
-                    <UniversalLink
-                      key={action.url}
-                      href={
-                        action.url.endsWith('/login')
-                          ? `${loginUrl}?return_url=${encodeURIComponent(location.pathname)}`
-                          : action.url
-                      }
-                      className="ui button primary"
-                    >
-                      {action.label}
-                    </UniversalLink>
-                  ))}
-                </p>
-              )}
-            </>
-          ) : (
-            <>
-              <p>This content is available to members only.</p>
-              <Link
-                to={{
-                  pathname: loginUrl,
-                  state: { next: location.pathname },
-                }}
-                className="ui button primary"
-              >
-                Log in to read
-              </Link>
-            </>
-          )}
-        </div>
+        <MembersOnlyGate content={content} />
       </Container>
     </>
   );

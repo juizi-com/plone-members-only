@@ -1,13 +1,24 @@
+from Acquisition import aq_base
+from collective.membersonly.access import access_info
 from collective.membersonly.access import access_message
+from collective.membersonly.interfaces import ITeaserFieldProvider
+from plone import api
 from plone.namedfile.scaling import ImageScaling
 from plone.registry.interfaces import IRegistry
 from plone.restapi.serializer.converters import json_compatible
 from plone.restapi.services import Service
 from Products.CMFCore.utils import getToolByName
+from zope.component import getUtilitiesFor
 from zope.component import getUtility
 from zope.interface import implementer
 from zope.publisher.interfaces import IPublishTraverse
 
+import logging
+
+
+logger = logging.getLogger("collective.membersonly")
+
+KNOWN_RECORD = "collective.membersonly.teaser_state.known"
 
 DEFAULT_TEASER_FIELDS = {
     "description",
@@ -17,15 +28,97 @@ DEFAULT_TEASER_FIELDS = {
 }
 
 
-def teaser_fields():
+BUILT_IN_FIELDS = {
+    "description": "Description",
+    "preview_image": "Preview image",
+    "effective": "Publication date",
+    "creators": "Creators",
+    "subjects": "Tags",
+    "language": "Language",
+}
+
+
+def registered_fields():
+    """What other add-ons offer on this site, by name. A field refused by
+    anyone stays refused."""
+    site = api.portal.get()
+    result = {}
+    for name, provider in getUtilitiesFor(ITeaserFieldProvider):
+        try:
+            fields = list(provider.fields(site))
+        except Exception:
+            logger.exception("Teaser field provider %s failed", name)
+            continue
+        for field in fields:
+            existing = result.get(field.name)
+            if existing is None or field.never_public:
+                result[field.name] = field
+    return result
+
+
+def refused_fields(registered=None):
+    registered = registered_fields() if registered is None else registered
+    return {name for name, field in registered.items() if field.never_public}
+
+
+def offered_fields():
+    """(name, label) of everything an admin can put in the teaser."""
+    registered = registered_fields()
+    refused = refused_fields(registered)
+    result = dict(BUILT_IN_FIELDS)
+    for name, field in registered.items():
+        if name not in BUILT_IN_FIELDS:
+            result[name] = field.label or name
+    return [(name, label) for name, label in result.items() if name not in refused]
+
+
+def stored_fields():
     try:
-        registry = getUtility(IRegistry)
-        fields = registry.get("collective.membersonly.teaser_fields", None)
-        if fields is not None:
-            return set(fields)
+        fields = getUtility(IRegistry).get("collective.membersonly.teaser_fields", None)
     except Exception:
-        pass
-    return DEFAULT_TEASER_FIELDS
+        fields = None
+    return DEFAULT_TEASER_FIELDS if fields is None else set(fields)
+
+
+def teaser_fields():
+    """The fields in the teaser: what's stored, plus fields that are on by
+    default and that no admin has had the chance to turn off yet. The stored
+    list can't tell those from fields turned off, and whichever add-on is
+    installed first, the other finds the same result."""
+    registered = registered_fields()
+    known = set(api.portal.get_registry_record(KNOWN_RECORD, default=None) or ())
+    fields = set(stored_fields()) | {
+        name
+        for name, field in registered.items()
+        if field.default and name not in known
+    }
+    return fields - refused_fields(registered)
+
+
+def remember_offered_fields():
+    """An admin has now seen every field: what they left off stays off."""
+    if api.portal.get_registry_record(KNOWN_RECORD, default=None) is None:
+        return
+    names = sorted(registered_fields())
+    api.portal.set_registry_record(KNOWN_RECORD, names)
+
+
+def add_registered_fields(result, obj, request, fields):
+    registered = registered_fields()
+    for name in sorted(fields & set(registered) - set(BUILT_IN_FIELDS) - set(result)):
+        field = registered[name]
+        try:
+            value = (
+                field.serialize(obj, request)
+                if field.serialize
+                else getattr(aq_base(obj), name, None)
+            )
+        except Exception:
+            # Left out: a teaser can go without a field.
+            logger.exception("Teaser field %s failed on %r", name, obj)
+            continue
+        if value not in (None, "", [], (), {}):
+            result[name] = json_compatible(value)
 
 
 def teaser_data(obj, request):
@@ -41,6 +134,7 @@ def teaser_data(obj, request):
         "@type": obj.portal_type,
         "review_state": state,
         "is_members_only": state == "members_only",
+        "members_only": access_info(obj),
         "title": obj.Title(),
         # What this visitor is told and offered (login, joining...).
         "access_message": access_message(obj, request),
@@ -102,6 +196,7 @@ def teaser_data(obj, request):
             except Exception:
                 pass
 
+    add_registered_fields(result, obj, request, fields)
     return result
 
 

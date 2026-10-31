@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { withServerErrorCode } from '@plone/volto/helpers/Utils/Utils';
 import { getBaseUrl } from '@plone/volto/helpers/Url/Url';
 import config from '@plone/volto/registry';
-import MembersOnlyTeaser from './MembersOnlyTeaser';
+import MembersOnlyTeaserView from './MembersOnlyTeaserView';
 
 const MembersOnlyUnauthorized = () => {
   const location = useLocation();
@@ -41,7 +41,7 @@ const MembersOnlyUnauthorized = () => {
   if (loading) return null;
 
   if (teaserContent) {
-    return <MembersOnlyTeaser content={teaserContent} />;
+    return <MembersOnlyTeaserView content={teaserContent} />;
   }
 
   // Fall back to standard unauthorized message

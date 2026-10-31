@@ -2,6 +2,7 @@
 they get its teaser as a normal page, so Volto shows it with the site's
 navigation, breadcrumbs and settings around it."""
 
+from collective.membersonly.access import access_info
 from collective.membersonly.access import can_view
 from collective.membersonly.access import is_members_only
 from collective.membersonly.views.teaser import teaser_data
@@ -17,7 +18,9 @@ LAYOUT = "members_only_teaser"
 class MembersOnlyContentGet(ContentGet):
     def reply(self):
         if can_view(self.context):
-            return super().reply()
+            result = super().reply()
+            result["members_only"] = access_info(self.context)
+            return result
         # The teaser permission is granted far more widely than View (by
         # the site's rolemap, for content in other workflows): anything
         # but members-only content stays as protected as plone.restapi's
