@@ -1,0 +1,1 @@
+Other add-ons can render the teaser for their own content (`membersOnlyTeaserRenderer`) and use `config.settings.membersOnly`: the gating JSON-LD, the gate selector and a Members only badge for listing cards. The gate's action links have a `data-members-only-action` attribute for analytics. @karel

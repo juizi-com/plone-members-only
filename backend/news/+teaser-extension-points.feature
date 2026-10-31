@@ -1,0 +1,1 @@
+Other add-ons can offer teaser fields through `ITeaserFieldProvider`: the settings panel lists them, an admin decides what's public and a field can be refused outright. Content responses and listings say what's members-only (`members_only`), so nobody has to guess from a state name. Run the upgrade step. @karel

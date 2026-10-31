@@ -94,6 +94,7 @@ People who can't read a members-only item see its teaser and a message. By defau
 - `post_install` handler creates the workflow programmatically on install
 - `uninstall` handler safely retracts all members_only content before removing the workflow
 - Registry-based settings controlling which fields surface in the teaser
+- Content responses and listings say what's members-only (`members_only`)
 
 ### Frontend (volto-members-only)
 
@@ -103,10 +104,11 @@ People who can't read a members-only item see its teaser and a message. By defau
 - Full Open Graph and schema.org head markup including `isAccessibleForFree: false`
 - Offers collective.membersonly in Site Setup → Add-ons (`offerAddon.js`), which the backend leaves out of the list until it is installed on the site; it wraps any add-ons reducer configured before it
 - Registered automatically via `volto.config.js`
+- `config.settings.membersOnly` for other add-ons: see [Building on members-only](#building-on-members-only)
 
 ### Configurable fields
 
-Site admins can configure which fields surface in the teaser via Site Setup under Members Only Settings. Available fields are description, preview_image, effective, creators, subjects, and language. Title and review_state are always included regardless of this setting.
+Site admins can configure which fields surface in the teaser via Site Setup under Members Only Settings. Available fields are description, preview_image, effective, creators, subjects, and language, plus any other add-on offers. Title and review_state are always included regardless of this setting.
 
 The teaser view reads the field list from the Plone registry at request time, so changes take effect immediately without restarting the server.
 
@@ -157,6 +159,89 @@ This is expected behaviour — an authenticated user should see full content. To
 
 In production there is only one URL and one login path through Volto, so this distinction does not arise.
 
+## Building on members-only
+
+Nothing here is needed to use the add-on. Each part is optional, for add-ons that want gated content to look like their own, and neither side has to depend on the other.
+
+### Is this gated, and can this visitor see it?
+
+Don't work it out from a state name or a layout. Every content response has:
+
+```json
+"members_only": { "gated": true, "can_view": false }
+```
+
+Listings and search results have `"members_only": true` or `false`, with no request per item. Who can view something is per person, so listings can't say.
+
+### Offering teaser fields (backend)
+
+The teaser is built by hand, so a field from a behaviour only appears if it's offered. Register a named utility:
+
+```python
+from collective.membersonly.interfaces import ITeaserFieldProvider
+from collective.membersonly.interfaces import TeaserField
+from zope.interface import implementer
+
+
+@implementer(ITeaserFieldProvider)
+class MyTeaserFields:
+    def fields(self, site):
+        # Utilities are per instance, and an instance can host sites without
+        # your add-on: return nothing for those.
+        return (
+            TeaserField("summary", "Summary", default=True),
+            TeaserField(
+                "publisher",
+                "Publisher",
+                serialize=lambda obj, request: obj.publisher.title,
+            ),
+            TeaserField("attachment", never_public=True),
+        )
+```
+
+Register it in ZCML with `zcml:condition="installed collective.membersonly"`, so your add-on still works without this one.
+
+- **Fields appear in the settings panel,** and the site admin decides. `default=True` means on until an admin has saved the panel without it. It works the same whichever add-on is installed first.
+- **`never_public` refuses a field.** It isn't offered, and stays out of the teaser whatever is stored and whoever else offers it. A provider can refuse a built-in field too. Use it for files.
+- **`serialize`** gets `(context, request)` and returns something JSON compatible. Without it, the attribute of that name is used. An empty value leaves the field out.
+- **A field can't replace what's in the teaser already,** and a field or provider that fails is logged and left out.
+
+### Rendering a teaser (frontend)
+
+Register a renderer for content you want to show yourself. Add-on load order doesn't matter:
+
+```js
+config.registerUtility({
+  name: 'my-addon',
+  type: 'membersOnlyTeaserRenderer',
+  method: (content) => (content['@type'] === 'Book' ? BookTeaser : null),
+});
+```
+
+`BookTeaser` gets `content` and `Gate`, and **must render `<Gate content={content} />`:** that's the access message and its actions, and the gating markup points at its class.
+
+A renderer replaces the whole teaser, head output included. So it owns the page's tags, and there's no way to end up with two sets of them. Use `gatingJsonLd` to stay honest with Google.
+
+### `config.settings.membersOnly`
+
+Check for it when rendering, not when loading:
+
+| Name | What it is |
+|---|---|
+| `version` | Goes up when something here changes |
+| `gatingJsonLd(content)` | `isAccessibleForFree` and `hasPart` to merge into your JSON-LD; nothing for content that isn't gated |
+| `gateSelector` | `.members-only-gate` |
+| `isGated(content)` | Whether a full item, a teaser or a listing item is gated |
+| `Badge` | `<Badge item={item} />`: "Members only" on a card, from the listing data |
+
+### Tracking
+
+The gate's links have a `data-members-only-action` attribute with the action's label, so a site can track teaser views that lead to a login or a subscription without custom code.
+
+### Sitemap
+
+Gated items are in the sitemap: they reach anonymous `@search`, which is what Volto builds it from.
+
 ## Current status
 
 ### Complete
@@ -172,10 +257,7 @@ In production there is only one URL and one login path through Volto, so this di
 - Access message extension point (`IAccessMessage`), used by collective.membership
 - Safe uninstall with content retraction and audit trail
 - Private GitHub repository at juizi-com/plone-members-only
-
-### Planned
-
-- Members only badge in listing and search results
+- Extension points for other add-ons: access information, teaser fields, teaser renderers and the Members only badge
 
 ## Resolved limitations
 
