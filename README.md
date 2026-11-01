@@ -72,6 +72,7 @@ The addon introduces a custom permission — `Collective Members Only: View Teas
 - In the private and pending states the role grants nothing, so unpublished items in a shared folder stay hidden.
 - **"Any logged-in user can view members-only content"** (Members Only settings, on by default) shares the site root with Logged-in users in that column: the original behaviour, where any account reads members-only content. Switch it off when access should depend on groups, for example with collective.membership.
 - Upgrading to profile version 1001 keeps existing sites as they were: the setting is switched on.
+- Gated items are in visitors' listings, so their summaries come from the catalog alone. A field with no column would make Plone wake the item, which a visitor may not do, and that loses the whole listing. It happens when a package is loaded for the process but not installed on this site, or its upgrade hasn't run, so `blocklisted_attributes` in `serializers/summary.py` leaves such fields out. Fields asked for by name with `metadata_fields` aren't covered: ask only for catalog columns.
 
 ### Access message
 
@@ -95,6 +96,7 @@ People who can't read a members-only item see its teaser and a message. By defau
 - `uninstall` handler safely retracts all members_only content before removing the workflow
 - Registry-based settings controlling which fields surface in the teaser
 - Content responses and listings say what's members-only (`members_only`)
+- Listings never wake a gated item: on sites with this add-on, a field another add-on lists by default but this site's catalog has no column for is left out of summaries. Otherwise one gated item would fail the whole listing for visitors
 
 ### Frontend (volto-members-only)
 
