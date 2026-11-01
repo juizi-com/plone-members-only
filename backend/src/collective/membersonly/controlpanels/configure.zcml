@@ -17,6 +17,9 @@
       name="members-only"
       />
 
+  <adapter factory=".controlpanel.MembersOnlyPanelToJson" />
+  <adapter factory=".controlpanel.MembersOnlyPanelFromJson" />
+
   <subscriber
       for=".controlpanel.IMembersOnlySettings
            plone.registry.interfaces.IRecordModifiedEvent"

@@ -1,5 +1,10 @@
 <configure xmlns="http://namespaces.zope.org/zope">
 
+  <utility
+      name="collective.membersonly.teaser_fields"
+      component=".teaser_fields.teaser_fields_vocabulary"
+      />
+
   <!-- -*- extra stuff goes here -*- -->
 
 </configure>

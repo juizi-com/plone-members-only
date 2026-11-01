@@ -48,6 +48,12 @@ def can_view(obj):
     return bool(getSecurityManager().checkPermission("View", obj))
 
 
+def access_info(obj):
+    """What other add-ons need to know: never work it out from a state name
+    or a layout."""
+    return {"gated": is_members_only(obj), "can_view": can_view(obj)}
+
+
 def gets_teaser(obj):
     """Members-only content this person can't read: they get the teaser."""
     return is_members_only(obj) and not can_view(obj)

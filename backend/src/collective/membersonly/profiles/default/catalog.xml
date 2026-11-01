@@ -7,7 +7,5 @@
     <indexed_attr value="industry" />
   </index>
 -->
-  <!-- Metadata
-  <column value="industry" />
--->
+  <column value="members_only" />
 </object>

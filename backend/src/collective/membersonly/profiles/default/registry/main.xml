@@ -14,4 +14,7 @@
       <element>creators</element>
     </value>
   </records>
+  <records interface="collective.membersonly.controlpanels.controlpanel.ITeaserState"
+           prefix="collective.membersonly.teaser_state"
+  />
 </registry>

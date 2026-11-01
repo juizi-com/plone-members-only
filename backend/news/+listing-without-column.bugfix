@@ -1,0 +1,1 @@
+A gated item no longer fails a whole listing for visitors when another add-on lists a field by default that this site's catalog has no column for, such as plonegovbr.socialmedia's `social_links` on a site where it isn't installed.

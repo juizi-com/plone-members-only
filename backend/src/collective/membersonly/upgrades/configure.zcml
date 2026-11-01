@@ -25,4 +25,13 @@
       handler=".to_1001"
       />
 
+  <genericsetup:upgradeStep
+      title="Teaser field extension point"
+      description="Other add-ons can offer teaser fields; listings know what's members-only."
+      profile="collective.membersonly:default"
+      source="1001"
+      destination="1002"
+      handler=".to_1002"
+      />
+
 </configure>
